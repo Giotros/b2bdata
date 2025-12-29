@@ -202,207 +202,44 @@ const ProductSnapshotTracker = () => {
     };
   };
 
-  const scrollToTool = () => {
-    document.getElementById('tool-section').scrollIntoView({ behavior: 'smooth' });
-  };
-
   const COLORS = ['#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899'];
-
-  const faqs = [
-    {
-      q: "What XML formats are supported?",
-      a: "The tool supports most standard XML feed formats including Google Shopping feeds, custom product feeds, and any XML with product elements containing ID/SKU, title/name, price, and quantity fields."
-    },
-    {
-      q: "How often should I create snapshots?",
-      a: "It depends on how frequently your suppliers update their feeds. For suppliers that change prices daily or weekly, create snapshots regularly. For more stable suppliers, bi-weekly or monthly snapshots work well."
-    },
-    {
-      q: "Is my data stored or shared?",
-      a: "No. All processing happens in your browser. Your XML data and snapshots never leave your device. We don't store, track, or have access to any of your supplier data."
-    },
-    {
-      q: "Can I compare more than two snapshots?",
-      a: "Currently, the tool compares two snapshots at a time. If you have 5 suppliers, you'll create 5 snapshots per day and compare each supplier's Day A vs Day B separately."
-    },
-    {
-      q: "What if my supplier changes their XML format?",
-      a: "The tool is flexible and tries to detect common field names automatically. If a format changes significantly, you may need to verify the snapshot captures the correct data."
-    }
-  ];
 
   return (
     <div className="min-h-screen bg-slate-900 text-slate-100">
       {/* Hero Section */}
       <div className="bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 border-b border-slate-800">
-        <div className="max-w-6xl mx-auto px-6 py-20 text-center">
+        <div className="max-w-6xl mx-auto px-6 py-16 text-center">
           <div className="flex items-center justify-center mb-6">
             <TrendingUp className="w-16 h-16 text-blue-400" />
           </div>
           <h1 className="text-5xl md:text-6xl font-bold mb-4 bg-gradient-to-r from-blue-400 to-blue-600 bg-clip-text text-transparent">
-            Product Snapshot Tracker
+            B2B Data Tracker
           </h1>
-          <p className="text-xl text-slate-300 mb-8 max-w-2xl mx-auto">
-            Monitor your suppliers' pricing and inventory changes over time. Compare snapshots from different dates to track trends and spot opportunities.
+          <p className="text-xl text-slate-300 mb-4 max-w-2xl mx-auto">
+            Monitor your suppliers' pricing and inventory changes over time
           </p>
-          <button
-            onClick={scrollToTool}
-            className="bg-blue-600 text-white px-8 py-4 rounded-lg font-semibold hover:bg-blue-700 transition-all shadow-lg hover:shadow-blue-500/50"
-          >
-            Get Started Free
-          </button>
-        </div>
-      </div>
-
-      {/* Real World Use Case */}
-      <div className="max-w-5xl mx-auto px-6 py-16">
-        <div className="bg-gradient-to-br from-blue-900/40 to-slate-800/40 border border-blue-500/30 rounded-2xl p-8 md:p-12">
-          <div className="flex items-center gap-3 mb-6">
-            <div className="bg-blue-600 p-3 rounded-lg">
-              <TrendingUp className="w-8 h-8 text-white" />
+          <p className="text-slate-400 max-w-xl mx-auto mb-8">
+            Compare snapshots from different dates to identify trending products and make data-driven purchasing decisions
+          </p>
+          <div className="flex items-center justify-center gap-6 text-sm text-slate-400">
+            <div className="flex items-center gap-2">
+              <Zap className="w-4 h-4 text-blue-400" />
+              <span>100% Free</span>
             </div>
-            <h2 className="text-3xl font-bold text-blue-400">Real World Example</h2>
-          </div>
-          
-          <div className="space-y-6 text-slate-300">
-            <p className="text-lg leading-relaxed">
-              It's summer, and you're managing an electronics store. You have 5 suppliers offering air conditioning units. 
-              You want to identify the <span className="text-blue-400 font-semibold">best-selling models</span> so you can make smart inventory decisions.
-            </p>
-            
-            <div className="bg-slate-900/50 border border-slate-700 rounded-lg p-6">
-              <h3 className="text-xl font-semibold text-blue-400 mb-4">Here's what you do:</h3>
-              <div className="space-y-4">
-                <div className="flex gap-4">
-                  <div className="bg-blue-600 text-white font-bold rounded-full w-8 h-8 flex items-center justify-center flex-shrink-0">1</div>
-                  <div>
-                    <p className="font-semibold text-white">Monday (Day 1)</p>
-                    <p className="text-slate-400">Create snapshots from all 5 suppliers' XML feeds. Supplier A shows AC Model X has <span className="text-white font-medium">50 units</span> in stock.</p>
-                  </div>
-                </div>
-                
-                <div className="flex gap-4">
-                  <div className="bg-blue-600 text-white font-bold rounded-full w-8 h-8 flex items-center justify-center flex-shrink-0">2</div>
-                  <div>
-                    <p className="font-semibold text-white">Monday (Day 8)</p>
-                    <p className="text-slate-400">Create new snapshots. Now Supplier A shows AC Model X has only <span className="text-white font-medium">12 units</span> left!</p>
-                  </div>
-                </div>
-                
-                <div className="flex gap-4">
-                  <div className="bg-green-600 text-white font-bold rounded-full w-8 h-8 flex items-center justify-center flex-shrink-0">💡</div>
-                  <div>
-                    <p className="font-semibold text-green-400">The Insight</p>
-                    <p className="text-slate-400">Model X sold 38 units in a week = <span className="text-green-400 font-medium">hot seller!</span> Time to buy 30+ units before your competition does.</p>
-                  </div>
-                </div>
-              </div>
+            <div className="flex items-center gap-2">
+              <Shield className="w-4 h-4 text-blue-400" />
+              <span>Private & Secure</span>
             </div>
-            
-            <div className="bg-blue-900/30 border border-blue-500/30 rounded-lg p-6">
-              <h4 className="text-lg font-semibold text-blue-400 mb-3">🎯 Strategic Advantages:</h4>
-              <ul className="space-y-2 text-slate-300">
-                <li className="flex items-start gap-2">
-                  <span className="text-blue-400 font-bold">•</span>
-                  <span><strong className="text-white">Low Stock + High Sales =</strong> Buy in bulk, create local monopoly</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-blue-400 font-bold">•</span>
-                  <span><strong className="text-white">Trending Online Only?</strong> Stock it in your physical store before competitors notice</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-blue-400 font-bold">•</span>
-                  <span><strong className="text-white">Price Changes:</strong> Spot when suppliers increase prices = adjust your margins</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-blue-400 font-bold">•</span>
-                  <span><strong className="text-white">Dead Stock:</strong> Products with no quantity changes? Don't waste money stocking them</span>
-                </li>
-              </ul>
-            </div>
-            
-            <p className="text-center text-lg text-blue-400 font-semibold">
-              Track trends. Make data-driven decisions. Stay ahead of competition.
-            </p>
-          </div>
-        </div>
-      </div>
-
-      {/* Features Section */}
-      <div className="max-w-6xl mx-auto px-6 py-16">
-        <h2 className="text-3xl font-bold text-center mb-12 text-blue-400">Why Use Snapshot Tracker?</h2>
-        <div className="grid md:grid-cols-3 gap-8">
-          <div className="bg-slate-800 p-6 rounded-xl border border-slate-700 hover:border-blue-500 transition-all">
-            <Zap className="w-12 h-12 text-blue-400 mb-4" />
-            <h3 className="text-xl font-semibold mb-3">Lightning Fast</h3>
-            <p className="text-slate-400">
-              Process thousands of products in seconds. No waiting, no server delays. Everything runs in your browser.
-            </p>
-          </div>
-          <div className="bg-slate-800 p-6 rounded-xl border border-slate-700 hover:border-blue-500 transition-all">
-            <Shield className="w-12 h-12 text-blue-400 mb-4" />
-            <h3 className="text-xl font-semibold mb-3">100% Private</h3>
-            <p className="text-slate-400">
-              Your data never leaves your device. No uploads, no storage, no tracking. Complete privacy guaranteed.
-            </p>
-          </div>
-          <div className="bg-slate-800 p-6 rounded-xl border border-slate-700 hover:border-blue-500 transition-all">
-            <BarChart3 className="w-12 h-12 text-blue-400 mb-4" />
-            <h3 className="text-xl font-semibold mb-3">Smart Insights</h3>
-            <p className="text-slate-400">
-              Visual charts and detailed breakdowns help you spot supplier trends, price changes, and inventory fluctuations instantly.
-            </p>
-          </div>
-        </div>
-      </div>
-
-      {/* How It Works */}
-      <div className="bg-slate-800/50 border-y border-slate-700">
-        <div className="max-w-6xl mx-auto px-6 py-16">
-          <h2 className="text-3xl font-bold text-center mb-12 text-blue-400">How It Works</h2>
-          <div className="grid md:grid-cols-4 gap-8">
-            <div className="text-center">
-              <div className="bg-blue-600 w-16 h-16 rounded-full flex items-center justify-center text-2xl font-bold mx-auto mb-4">
-                1
-              </div>
-              <h3 className="text-lg font-semibold mb-2">Create Snapshot</h3>
-              <p className="text-slate-400 text-sm">
-                Upload your supplier's XML feed or paste the content directly
-              </p>
-            </div>
-            <div className="text-center">
-              <div className="bg-blue-600 w-16 h-16 rounded-full flex items-center justify-center text-2xl font-bold mx-auto mb-4">
-                2
-              </div>
-              <h3 className="text-lg font-semibold mb-2">Save JSON File</h3>
-              <p className="text-slate-400 text-sm">
-                Download the timestamped snapshot to your computer for safekeeping
-              </p>
-            </div>
-            <div className="text-center">
-              <div className="bg-blue-600 w-16 h-16 rounded-full flex items-center justify-center text-2xl font-bold mx-auto mb-4">
-                3
-              </div>
-              <h3 className="text-lg font-semibold mb-2">Wait & Repeat</h3>
-              <p className="text-slate-400 text-sm">
-                Come back after days or weeks and create another snapshot
-              </p>
-            </div>
-            <div className="text-center">
-              <div className="bg-blue-600 w-16 h-16 rounded-full flex items-center justify-center text-2xl font-bold mx-auto mb-4">
-                4
-              </div>
-              <h3 className="text-lg font-semibold mb-2">Compare & Analyze</h3>
-              <p className="text-slate-400 text-sm">
-                Upload both snapshots to see detailed changes and trends
-              </p>
+            <div className="flex items-center gap-2">
+              <Clock className="w-4 h-4 text-blue-400" />
+              <span>No Registration</span>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Tool Section */}
-      <div id="tool-section" className="max-w-6xl mx-auto px-6 py-16">
+      {/* Tool Section - MOVED TO TOP */}
+      <div className="max-w-6xl mx-auto px-6 py-12">
         {/* Navigation */}
         <div className="flex justify-center gap-4 mb-8">
           <button
@@ -449,7 +286,7 @@ const ProductSnapshotTracker = () => {
                 </label>
                 <input
                   type="text"
-                  placeholder="https://example.com/products.xml"
+                  placeholder="https://supplier.com/products.xml"
                   value={xmlUrl}
                   onChange={(e) => setXmlUrl(e.target.value)}
                   className="w-full px-4 py-3 bg-slate-900 border border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-slate-100 placeholder-slate-500"
@@ -714,42 +551,211 @@ const ProductSnapshotTracker = () => {
         )}
       </div>
 
-      {/* FAQ Section */}
+      {/* Real World Use Case - MOVED BELOW TOOL */}
       <div className="bg-slate-800/50 border-y border-slate-700">
-        <div className="max-w-4xl mx-auto px-6 py-16">
-          <h2 className="text-3xl font-bold text-center mb-12 text-blue-400">Frequently Asked Questions</h2>
-          <div className="space-y-4">
-            {faqs.map((faq, index) => (
-              <div key={index} className="bg-slate-800 rounded-lg border border-slate-700 overflow-hidden">
-                <button
-                  onClick={() => setOpenFaq(openFaq === index ? null : index)}
-                  className="w-full px-6 py-4 text-left flex items-center justify-between hover:bg-slate-700/50 transition-colors"
-                >
-                  <span className="font-semibold">{faq.q}</span>
-                  <ChevronDown className={`w-5 h-5 transition-transform ${openFaq === index ? 'rotate-180' : ''}`} />
-                </button>
-                {openFaq === index && (
-                  <div className="px-6 pb-4 text-slate-400">
-                    {faq.a}
-                  </div>
-                )}
+        <div className="max-w-5xl mx-auto px-6 py-16">
+          <div className="bg-gradient-to-br from-blue-900/40 to-slate-800/40 border border-blue-500/30 rounded-2xl p-8 md:p-12">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="bg-blue-600 p-3 rounded-lg">
+                <TrendingUp className="w-8 h-8 text-white" />
               </div>
-            ))}
+              <h2 className="text-3xl font-bold text-blue-400">Real World Example</h2>
+            </div>
+            
+            <div className="space-y-6 text-slate-300">
+              <p className="text-lg leading-relaxed">
+                It's summer, and you're managing an electronics store. You have 5 suppliers offering air conditioning units. 
+                You want to identify the <span className="text-blue-400 font-semibold">best-selling models</span> so you can make smart inventory decisions.
+              </p>
+              
+              <div className="bg-slate-900/50 border border-slate-700 rounded-lg p-6">
+                <h3 className="text-xl font-semibold text-blue-400 mb-4">Here's what you do:</h3>
+                <div className="space-y-4">
+                  <div className="flex gap-4">
+                    <div className="bg-blue-600 text-white font-bold rounded-full w-8 h-8 flex items-center justify-center flex-shrink-0">1</div>
+                    <div>
+                      <p className="font-semibold text-white">Monday (Day 1)</p>
+                      <p className="text-slate-400">Create snapshots from all 5 suppliers' XML feeds. Supplier A shows AC Model X has <span className="text-white font-medium">50 units</span> in stock.</p>
+                    </div>
+                  </div>
+                  
+                  <div className="flex gap-4">
+                    <div className="bg-blue-600 text-white font-bold rounded-full w-8 h-8 flex items-center justify-center flex-shrink-0">2</div>
+                    <div>
+                      <p className="font-semibold text-white">Monday (Day 8)</p>
+                      <p className="text-slate-400">Create new snapshots. Now Supplier A shows AC Model X has only <span className="text-white font-medium">12 units</span> left!</p>
+                    </div>
+                  </div>
+                  
+                  <div className="flex gap-4">
+                    <div className="bg-green-600 text-white font-bold rounded-full w-8 h-8 flex items-center justify-center flex-shrink-0">💡</div>
+                    <div>
+                      <p className="font-semibold text-green-400">The Insight</p>
+                      <p className="text-slate-400">Model X sold 38 units in a week = <span className="text-green-400 font-medium">hot seller!</span> Time to buy 30+ units before your competition does.</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="bg-blue-900/30 border border-blue-500/30 rounded-lg p-6">
+                <h4 className="text-lg font-semibold text-blue-400 mb-3">🎯 Strategic Advantages:</h4>
+                <ul className="space-y-2 text-slate-300">
+                  <li className="flex items-start gap-2">
+                    <span className="text-blue-400 font-bold">•</span>
+                    <span><strong className="text-white">Low Stock + High Sales =</strong> Buy in bulk, create local monopoly</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-blue-400 font-bold">•</span>
+                    <span><strong className="text-white">Trending Online Only?</strong> Stock it in your physical store before competitors notice</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-blue-400 font-bold">•</span>
+                    <span><strong className="text-white">Price Changes:</strong> Spot when suppliers increase prices = adjust your margins</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-blue-400 font-bold">•</span>
+                    <span><strong className="text-white">Dead Stock:</strong> Products with no quantity changes? Don't waste money stocking them</span>
+                  </li>
+                </ul>
+              </div>
+              
+              <p className="text-center text-lg text-blue-400 font-semibold">
+                Track trends. Make data-driven decisions. Stay ahead of competition.
+              </p>
+            </div>
           </div>
+        </div>
+      </div>
+
+      {/* How It Works */}
+      <div className="max-w-6xl mx-auto px-6 py-16">
+        <h2 className="text-3xl font-bold text-center mb-12 text-blue-400">How It Works</h2>
+        <div className="grid md:grid-cols-4 gap-8">
+          <div className="text-center">
+            <div className="bg-blue-600 w-16 h-16 rounded-full flex items-center justify-center text-2xl font-bold mx-auto mb-4">
+              1
+            </div>
+            <h3 className="text-lg font-semibold mb-2">Create Snapshot</h3>
+            <p className="text-slate-400 text-sm">
+              Upload your supplier's XML feed or paste the content directly
+            </p>
+          </div>
+          <div className="text-center">
+            <div className="bg-blue-600 w-16 h-16 rounded-full flex items-center justify-center text-2xl font-bold mx-auto mb-4">
+              2
+            </div>
+            <h3 className="text-lg font-semibold mb-2">Save JSON File</h3>
+            <p className="text-slate-400 text-sm">
+              Download the timestamped snapshot to your computer for safekeeping
+            </p>
+          </div>
+          <div className="text-center">
+            <div className="bg-blue-600 w-16 h-16 rounded-full flex items-center justify-center text-2xl font-bold mx-auto mb-4">
+              3
+            </div>
+            <h3 className="text-lg font-semibold mb-2">Wait & Repeat</h3>
+            <p className="text-slate-400 text-sm">
+              Come back after days or weeks and create another snapshot
+            </p>
+          </div>
+          <div className="text-center">
+            <div className="bg-blue-600 w-16 h-16 rounded-full flex items-center justify-center text-2xl font-bold mx-auto mb-4">
+              4
+            </div>
+            <h3 className="text-lg font-semibold mb-2">Compare & Analyze</h3>
+            <p className="text-slate-400 text-sm">
+              Upload both snapshots to see detailed changes and trends
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Features Section */}
+      <div className="bg-slate-800/50 border-y border-slate-700">
+        <div className="max-w-6xl mx-auto px-6 py-16">
+          <h2 className="text-3xl font-bold text-center mb-12 text-blue-400">Why Use B2B Data Tracker?</h2>
+          <div className="grid md:grid-cols-3 gap-8">
+            <div className="bg-slate-800 p-6 rounded-xl border border-slate-700 hover:border-blue-500 transition-all">
+              <Zap className="w-12 h-12 text-blue-400 mb-4" />
+              <h3 className="text-xl font-semibold mb-3">Lightning Fast</h3>
+              <p className="text-slate-400">
+                Process thousands of products in seconds. No waiting, no server delays. Everything runs in your browser.
+              </p>
+            </div>
+            <div className="bg-slate-800 p-6 rounded-xl border border-slate-700 hover:border-blue-500 transition-all">
+              <Shield className="w-12 h-12 text-blue-400 mb-4" />
+              <h3 className="text-xl font-semibold mb-3">100% Private</h3>
+              <p className="text-slate-400">
+                Your data never leaves your device. No uploads, no storage, no tracking. Complete privacy guaranteed.
+              </p>
+            </div>
+            <div className="bg-slate-800 p-6 rounded-xl border border-slate-700 hover:border-blue-500 transition-all">
+              <BarChart3 className="w-12 h-12 text-blue-400 mb-4" />
+              <h3 className="text-xl font-semibold mb-3">Smart Insights</h3>
+              <p className="text-slate-400">
+                Visual charts and detailed breakdowns help you spot supplier trends, price changes, and inventory fluctuations instantly.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* FAQ Section */}
+      <div className="max-w-4xl mx-auto px-6 py-16">
+        <h2 className="text-3xl font-bold text-center mb-12 text-blue-400">Frequently Asked Questions</h2>
+        <div className="space-y-4">
+          {[
+            {
+              q: "What XML formats are supported?",
+              a: "The tool supports most standard XML feed formats including Google Shopping feeds, custom product feeds, and any XML with product elements containing ID/SKU, title/name, price, and quantity fields."
+            },
+            {
+              q: "How often should I create snapshots?",
+              a: "It depends on how frequently your suppliers update their feeds. For suppliers that change prices daily or weekly, create snapshots regularly. For more stable suppliers, bi-weekly or monthly snapshots work well."
+            },
+            {
+              q: "Is my data stored or shared?",
+              a: "No. All processing happens in your browser. Your XML data and snapshots never leave your device. We don't store, track, or have access to any of your supplier data."
+            },
+            {
+              q: "Can I compare more than two snapshots?",
+              a: "Currently, the tool compares two snapshots at a time. If you have 5 suppliers, you'll create 5 snapshots per day and compare each supplier's Day A vs Day B separately."
+            },
+            {
+              q: "What if my supplier changes their XML format?",
+              a: "The tool is flexible and tries to detect common field names automatically. If a format changes significantly, you may need to verify the snapshot captures the correct data."
+            }
+          ].map((faq, index) => (
+            <div key={index} className="bg-slate-800 rounded-lg border border-slate-700 overflow-hidden">
+              <button
+                onClick={() => setOpenFaq(openFaq === index ? null : index)}
+                className="w-full px-6 py-4 text-left flex items-center justify-between hover:bg-slate-700/50 transition-colors"
+              >
+                <span className="font-semibold">{faq.q}</span>
+                <ChevronDown className={`w-5 h-5 transition-transform ${openFaq === index ? 'rotate-180' : ''}`} />
+              </button>
+              {openFaq === index && (
+                <div className="px-6 pb-4 text-slate-400">
+                  {faq.a}
+                </div>
+              )}
+            </div>
+          ))}
         </div>
       </div>
 
       {/* Footer */}
       <footer className="bg-slate-900 border-t border-slate-800">
         <div className="max-w-6xl mx-auto px-6 py-8">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+          <div className="flex flex-col items-center gap-4 text-center">
             <div className="flex items-center gap-2">
               <TrendingUp className="w-6 h-6 text-blue-400" />
-              <span className="font-semibold">Snapshot Tracker</span>
+              <span className="font-semibold">B2B Data Tracker</span>
             </div>
-            <p className="text-slate-500 text-sm">
-              Free tool for tracking product changes. No registration required.
-            </p>
+            <div className="text-slate-500 text-sm space-y-1">
+              <p>© 2025 B2B Data Tracker. All rights reserved.</p>
+              <p>Created by Georgios Trochidis</p>
+            </div>
           </div>
         </div>
       </footer>

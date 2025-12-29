@@ -1,4 +1,4 @@
-# Product Snapshot Tracker
+# B2B Data Tracker
 
 Monitor your suppliers' pricing and inventory changes over time. Compare snapshots to identify trending products and make data-driven purchasing decisions.
 
@@ -33,4 +33,4 @@ This project is ready to deploy on:
 - Netlify
 - Cloudflare Pages
 
-See DEPLOYMENT.md for detailed instructions.
+See deployment instructions below.
