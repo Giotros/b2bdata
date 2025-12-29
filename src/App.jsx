@@ -81,13 +81,10 @@ const ProductSnapshotTracker = () => {
       let xmlData = '';
       
       if (xmlUrl) {
-        const response = await fetch(xmlUrl);
+        // Use our proxy API to avoid CORS issues
+        const response = await fetch(`/api/fetch-xml?url=${encodeURIComponent(xmlUrl)}`);
         if (!response.ok) throw new Error('Failed to fetch XML from URL');
         xmlData = await response.text();
-      } else if (xmlInput) {
-        xmlData = xmlInput;
-      } else {
-        throw new Error('Please provide XML content or URL');
       }
 
       const products = parseXML(xmlData);
