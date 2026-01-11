@@ -737,73 +737,189 @@ const ProductSnapshotTracker = () => {
                   </div>
                 </div>
 
-                {/* Detailed Changes */}
-                <div className="space-y-4">
-                  {comparison.changes.priceIncreased.length > 0 && (
-                    <details className="bg-red-900/20 border border-red-500/30 rounded-lg p-4">
-                      <summary className="font-semibold text-red-400 cursor-pointer hover:text-red-300">
-                        Price Increases ({comparison.changes.priceIncreased.length})
-                      </summary>
-                      <div className="mt-3 space-y-2">
-                        {comparison.changes.priceIncreased.slice(0, 10).map((p, i) => (
-                          <div key={i} className="text-sm text-red-200 bg-slate-900/50 p-2 rounded">
-                            <span className="font-medium">{p.name}</span> (SKU: {p.sku}) - 
-                            €{p.oldPrice.toFixed(2)} → €{p.price.toFixed(2)} 
-                            <span className="text-red-400 font-medium"> (+€{p.change.toFixed(2)})</span>
-                          </div>
-                        ))}
-                      </div>
-                    </details>
-                  )}
-
-                  {comparison.changes.priceDecreased.length > 0 && (
-                    <details className="bg-green-900/20 border border-green-500/30 rounded-lg p-4">
-                      <summary className="font-semibold text-green-400 cursor-pointer hover:text-green-300">
-                        Price Decreases ({comparison.changes.priceDecreased.length})
-                      </summary>
-                      <div className="mt-3 space-y-2">
-                        {comparison.changes.priceDecreased.slice(0, 10).map((p, i) => (
-                          <div key={i} className="text-sm text-green-200 bg-slate-900/50 p-2 rounded">
-                            <span className="font-medium">{p.name}</span> (SKU: {p.sku}) - 
-                            €{p.oldPrice.toFixed(2)} → €{p.price.toFixed(2)} 
-                            <span className="text-green-400 font-medium"> (-€{p.change.toFixed(2)})</span>
-                          </div>
-                        ))}
-                      </div>
-                    </details>
-                  )}
-
+                {/* Detailed Changes - VISUAL CARDS */}
+                <div className="space-y-6">
+                  {/* Stock Increases */}
                   {comparison.changes.quantityIncreased.length > 0 && (
-                    <details className="bg-blue-900/20 border border-blue-500/30 rounded-lg p-4">
-                      <summary className="font-semibold text-blue-400 cursor-pointer hover:text-blue-300">
-                        Stock Increases ({comparison.changes.quantityIncreased.length})
-                      </summary>
-                      <div className="mt-3 space-y-2">
-                        {comparison.changes.quantityIncreased.slice(0, 10).map((p, i) => (
-                          <div key={i} className="text-sm text-blue-200 bg-slate-900/50 p-2 rounded">
-                            <span className="font-medium">{p.name}</span> (SKU: {p.sku}) - 
-                            {p.oldQuantity} → {p.quantity} units 
-                            <span className="text-blue-400 font-medium"> (+{p.change})</span>
+                    <div className="bg-slate-800/50 border border-slate-700 rounded-lg p-6">
+                      <h3 className="text-xl font-semibold text-green-400 mb-4 flex items-center gap-2">
+                        📈 Stock Increases ({comparison.changes.quantityIncreased.length})
+                      </h3>
+                      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {comparison.changes.quantityIncreased.slice(0, 9).map((p, i) => (
+                          <div key={i} className="bg-slate-900/70 border border-green-500/30 rounded-lg p-4 hover:border-green-500/50 transition-all">
+                            <div className="flex items-start justify-between mb-2">
+                              <span className="text-xs text-slate-400">SKU: {p.sku}</span>
+                              <span className="bg-green-500/20 text-green-400 text-xs px-2 py-1 rounded font-semibold">
+                                +{p.change}
+                              </span>
+                            </div>
+                            <h4 className="text-sm font-medium text-white mb-3 line-clamp-2">{p.name}</h4>
+                            <div className="flex items-center justify-between">
+                              <div className="text-center">
+                                <p className="text-xs text-slate-500">Before</p>
+                                <p className="text-lg font-bold text-slate-300">{p.oldQuantity}</p>
+                              </div>
+                              <div className="text-green-400">→</div>
+                              <div className="text-center">
+                                <p className="text-xs text-slate-500">After</p>
+                                <p className="text-lg font-bold text-green-400">{p.quantity}</p>
+                              </div>
+                            </div>
                           </div>
                         ))}
                       </div>
-                    </details>
+                      {comparison.changes.quantityIncreased.length > 9 && (
+                        <p className="text-center text-slate-400 text-sm mt-4">
+                          + {comparison.changes.quantityIncreased.length - 9} more items
+                        </p>
+                      )}
+                    </div>
                   )}
 
-                  {comparison.changes.newProducts.length > 0 && (
-                    <details className="bg-purple-900/20 border border-purple-500/30 rounded-lg p-4">
-                      <summary className="font-semibold text-purple-400 cursor-pointer hover:text-purple-300">
-                        New Products ({comparison.changes.newProducts.length})
-                      </summary>
-                      <div className="mt-3 space-y-2">
-                        {comparison.changes.newProducts.slice(0, 10).map((p, i) => (
-                          <div key={i} className="text-sm text-purple-200 bg-slate-900/50 p-2 rounded">
-                            <span className="font-medium">{p.name}</span> (SKU: {p.sku}) - 
-                            €{p.price.toFixed(2)}, Stock: {p.quantity}
+                  {/* Stock Decreases - HOT SELLERS! */}
+                  {comparison.changes.quantityDecreased.length > 0 && (
+                    <div className="bg-slate-800/50 border border-slate-700 rounded-lg p-6">
+                      <h3 className="text-xl font-semibold text-orange-400 mb-4 flex items-center gap-2">
+                        🔥 Hot Sellers - Stock Decreased ({comparison.changes.quantityDecreased.length})
+                      </h3>
+                      <p className="text-sm text-orange-300 mb-4">These products are selling fast! Consider restocking.</p>
+                      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {comparison.changes.quantityDecreased
+                          .sort((a, b) => b.change - a.change)
+                          .slice(0, 9)
+                          .map((p, i) => (
+                          <div key={i} className="bg-slate-900/70 border border-orange-500/30 rounded-lg p-4 hover:border-orange-500/50 transition-all">
+                            <div className="flex items-start justify-between mb-2">
+                              <span className="text-xs text-slate-400">SKU: {p.sku}</span>
+                              <span className="bg-orange-500/20 text-orange-400 text-xs px-2 py-1 rounded font-semibold">
+                                -{p.change}
+                              </span>
+                            </div>
+                            <h4 className="text-sm font-medium text-white mb-3 line-clamp-2">{p.name}</h4>
+                            <div className="flex items-center justify-between">
+                              <div className="text-center">
+                                <p className="text-xs text-slate-500">Before</p>
+                                <p className="text-lg font-bold text-slate-300">{p.oldQuantity}</p>
+                              </div>
+                              <div className="text-orange-400">→</div>
+                              <div className="text-center">
+                                <p className="text-xs text-slate-500">After</p>
+                                <p className="text-lg font-bold text-orange-400">{p.quantity}</p>
+                              </div>
+                            </div>
+                            {p.quantity < 10 && p.change > 5 && (
+                              <div className="mt-2 bg-red-500/20 border border-red-500/30 rounded px-2 py-1">
+                                <p className="text-xs text-red-400 font-semibold">⚠️ Low Stock Alert!</p>
+                              </div>
+                            )}
                           </div>
                         ))}
                       </div>
-                    </details>
+                      {comparison.changes.quantityDecreased.length > 9 && (
+                        <p className="text-center text-slate-400 text-sm mt-4">
+                          + {comparison.changes.quantityDecreased.length - 9} more items
+                        </p>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Price Increases */}
+                  {comparison.changes.priceIncreased.length > 0 && (
+                    <div className="bg-slate-800/50 border border-slate-700 rounded-lg p-6">
+                      <h3 className="text-xl font-semibold text-red-400 mb-4 flex items-center gap-2">
+                        💰 Price Increases ({comparison.changes.priceIncreased.length})
+                      </h3>
+                      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {comparison.changes.priceIncreased.slice(0, 6).map((p, i) => (
+                          <div key={i} className="bg-slate-900/70 border border-red-500/30 rounded-lg p-4 hover:border-red-500/50 transition-all">
+                            <div className="flex items-start justify-between mb-2">
+                              <span className="text-xs text-slate-400">SKU: {p.sku}</span>
+                              <span className="bg-red-500/20 text-red-400 text-xs px-2 py-1 rounded font-semibold">
+                                +€{p.change.toFixed(2)}
+                              </span>
+                            </div>
+                            <h4 className="text-sm font-medium text-white mb-3 line-clamp-2">{p.name}</h4>
+                            <div className="flex items-center justify-between">
+                              <div className="text-center">
+                                <p className="text-xs text-slate-500">Before</p>
+                                <p className="text-lg font-bold text-slate-300">€{p.oldPrice.toFixed(2)}</p>
+                              </div>
+                              <div className="text-red-400">→</div>
+                              <div className="text-center">
+                                <p className="text-xs text-slate-500">After</p>
+                                <p className="text-lg font-bold text-red-400">€{p.price.toFixed(2)}</p>
+                              </div>
+                            </div>
+                            <div className="mt-2 text-center">
+                              <span className="text-xs text-red-400">
+                                +{((p.change / p.oldPrice) * 100).toFixed(1)}% increase
+                              </span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Price Decreases */}
+                  {comparison.changes.priceDecreased.length > 0 && (
+                    <div className="bg-slate-800/50 border border-slate-700 rounded-lg p-6">
+                      <h3 className="text-xl font-semibold text-green-400 mb-4 flex items-center gap-2">
+                        💸 Price Decreases ({comparison.changes.priceDecreased.length})
+                      </h3>
+                      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {comparison.changes.priceDecreased.slice(0, 6).map((p, i) => (
+                          <div key={i} className="bg-slate-900/70 border border-green-500/30 rounded-lg p-4 hover:border-green-500/50 transition-all">
+                            <div className="flex items-start justify-between mb-2">
+                              <span className="text-xs text-slate-400">SKU: {p.sku}</span>
+                              <span className="bg-green-500/20 text-green-400 text-xs px-2 py-1 rounded font-semibold">
+                                -€{p.change.toFixed(2)}
+                              </span>
+                            </div>
+                            <h4 className="text-sm font-medium text-white mb-3 line-clamp-2">{p.name}</h4>
+                            <div className="flex items-center justify-between">
+                              <div className="text-center">
+                                <p className="text-xs text-slate-500">Before</p>
+                                <p className="text-lg font-bold text-slate-300">€{p.oldPrice.toFixed(2)}</p>
+                              </div>
+                              <div className="text-green-400">→</div>
+                              <div className="text-center">
+                                <p className="text-xs text-slate-500">After</p>
+                                <p className="text-lg font-bold text-green-400">€{p.price.toFixed(2)}</p>
+                              </div>
+                            </div>
+                            <div className="mt-2 text-center">
+                              <span className="text-xs text-green-400">
+                                -{((p.change / p.oldPrice) * 100).toFixed(1)}% discount
+                              </span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* New Products */}
+                  {comparison.changes.newProducts.length > 0 && (
+                    <div className="bg-slate-800/50 border border-slate-700 rounded-lg p-6">
+                      <h3 className="text-xl font-semibold text-purple-400 mb-4 flex items-center gap-2">
+                        ✨ New Products Added ({comparison.changes.newProducts.length})
+                      </h3>
+                      <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+                        {comparison.changes.newProducts.slice(0, 8).map((p, i) => (
+                          <div key={i} className="bg-slate-900/70 border border-purple-500/30 rounded-lg p-4 hover:border-purple-500/50 transition-all">
+                            <span className="bg-purple-500/20 text-purple-400 text-xs px-2 py-1 rounded font-semibold">NEW</span>
+                            <h4 className="text-sm font-medium text-white mt-2 mb-2 line-clamp-2">{p.name}</h4>
+                            <p className="text-xs text-slate-400 mb-2">SKU: {p.sku}</p>
+                            <div className="flex items-center justify-between">
+                              <span className="text-green-400 font-bold">€{p.price.toFixed(2)}</span>
+                              <span className="text-xs text-slate-400">{p.quantity} units</span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
                   )}
                 </div>
 
