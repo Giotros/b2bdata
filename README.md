@@ -50,14 +50,6 @@ npm run dev
 npm run build
 ```
 
-## Environment Variables
-
-For admin analytics dashboard:
-
-```bash
-ADMIN_PASSWORD=your-secure-password
-```
-
 ## Project Structure
 
 ```
@@ -80,9 +72,6 @@ b2bdata/
 - ✅ GDPR-compliant cookies
 - ✅ Self-hosted analytics
 
-## License
-
-MIT License
 
 ## Author
 
