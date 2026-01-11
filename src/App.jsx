@@ -6,24 +6,151 @@ const ProductSnapshotTracker = () => {
   const [activeTab, setActiveTab] = useState('create');
   const [xmlInput, setXmlInput] = useState('');
   const [xmlUrl, setXmlUrl] = useState('');
+  const [xmlFile, setXmlFile] = useState(null);
   const [snapshot, setSnapshot] = useState(null);
   const [comparison, setComparison] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [openFaq, setOpenFaq] = useState(null);
+  const [cookieConsent, setCookieConsent] = useState(null);
+
+  // Check cookie consent on mount
+  React.useEffect(() => {
+    const consent = localStorage.getItem('cookieConsent');
+    if (consent) {
+      setCookieConsent(consent === 'accepted');
+    }
+  }, []);
+
+  // Load Google Analytics if consented
+  React.useEffect(() => {
+    if (cookieConsent === true && typeof window.gtag === 'undefined') {
+      // Load Google Analytics
+      const script1 = document.createElement('script');
+      script1.async = true;
+      script1.src = 'https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX'; // Replace with your GA ID
+      document.head.appendChild(script1);
+
+      const script2 = document.createElement('script');
+      script2.innerHTML = `
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-XXXXXXXXXX'); // Replace with your GA ID
+      `;
+      document.head.appendChild(script2);
+    }
+  }, [cookieConsent]);
+
+  const handleCookieConsent = (accepted) => {
+    setCookieConsent(accepted);
+    localStorage.setItem('cookieConsent', accepted ? 'accepted' : 'declined');
+  };
+
+  const sanitizeXML = (xmlString) => {
+    // Fix common XML issues
+    return xmlString
+      // Fix unescaped & that aren't part of entities
+      .replace(/&(?!(amp|lt|gt|quot|apos|#\d+|#x[0-9a-fA-F]+);)/g, '&amp;')
+      // Remove any BOM (Byte Order Mark)
+      .replace(/^\uFEFF/, '')
+      // Fix any double-escaped entities
+      .replace(/&amp;amp;/g, '&amp;');
+  };
 
   const parseXML = (xmlString) => {
+    // Sanitize XML first
+    const cleanXML = sanitizeXML(xmlString);
+    
     const parser = new DOMParser();
-    const xmlDoc = parser.parseFromString(xmlString, 'text/xml');
+    const xmlDoc = parser.parseFromString(cleanXML, 'text/xml');
+    
+    // Check for XML parsing errors
+    const parseError = xmlDoc.getElementsByTagName('parsererror');
+    if (parseError.length > 0) {
+      const errorText = parseError[0].textContent || 'Unknown parsing error';
+      console.error('XML Parse Error:', errorText);
+      console.error('XML Preview (sanitized):', cleanXML.substring(0, 1000));
+      
+      // Try to extract line number from error
+      const lineMatch = errorText.match(/line (\d+)/);
+      const line = lineMatch ? lineMatch[1] : 'unknown';
+      
+      throw new Error(`XML parsing failed at line ${line}. The XML may contain invalid characters or formatting. Try downloading the XML file and uploading it instead.`);
+    }
+    
+    // Detect root element
+    const root = xmlDoc.documentElement;
+    if (!root) {
+      throw new Error('Invalid XML: No root element found');
+    }
+    
+    console.log('Root element:', root.tagName);
+    
+    // Check if we got HTML instead of XML (CORS proxy issue)
+    if (root.tagName.toLowerCase() === 'html') {
+      throw new Error('ERROR: Got HTML instead of XML! This means:\n1. The CORS proxy is not working\n2. OR the website is blocking us\n\nSOLUTION: Download the XML file manually and upload it using the "Choose File" button.');
+    }
     
     const products = [];
-    const items = xmlDoc.getElementsByTagName('item') || xmlDoc.getElementsByTagName('product');
+    const detectedFields = { id: null, name: null, price: null, quantity: null, rootElement: root.tagName, itemElement: null };
+    
+    // SMART SEARCH - Look for product elements ANYWHERE in the tree (not just immediate children)
+    let items = null;
+    const possibleItemNames = ['product', 'item', 'entry', 'offer', 'listing', 'record'];
+    
+    for (let itemName of possibleItemNames) {
+      items = xmlDoc.getElementsByTagName(itemName);
+      if (items.length > 0) {
+        detectedFields.itemElement = itemName;
+        console.log(`✅ Found ${items.length} <${itemName}> elements`);
+        break;
+      }
+    }
+    
+    if (!items || items.length === 0) {
+      // Last resort - look for ANY element that repeats and has child elements
+      console.log('❌ Standard item names not found. Analyzing structure...');
+      const allElements = xmlDoc.getElementsByTagName('*');
+      const elementCounts = {};
+      
+      for (let elem of allElements) {
+        if (elem.children.length >= 2) { // Has at least 2 children (probably has id, name, etc.)
+          const tagName = elem.tagName.toLowerCase();
+          elementCounts[tagName] = (elementCounts[tagName] || 0) + 1;
+        }
+      }
+      
+      // Find the most repeated element with children
+      let maxCount = 0;
+      let bestGuess = null;
+      for (let [tag, count] of Object.entries(elementCounts)) {
+        if (count > maxCount && count >= 5) { // At least 5 items
+          maxCount = count;
+          bestGuess = tag;
+        }
+      }
+      
+      if (bestGuess) {
+        items = xmlDoc.getElementsByTagName(bestGuess);
+        detectedFields.itemElement = bestGuess;
+        console.log(`🔍 Smart guess: Found ${items.length} <${bestGuess}> elements`);
+      }
+    }
+    
+    if (!items || items.length === 0) {
+      console.error('XML Structure:', cleanXML.substring(0, 2000));
+      throw new Error(`No product items found. Root: <${root.tagName}>. Tried: ${possibleItemNames.join(', ')}. Cannot detect product structure automatically. Please check your XML format.`);
+    }
     
     for (let item of items) {
       const getId = (tags) => {
         for (let tag of tags) {
           const elem = item.getElementsByTagName(tag)[0];
-          if (elem) return elem.textContent;
+          if (elem) {
+            if (!detectedFields.id) detectedFields.id = tag;
+            return elem.textContent;
+          }
         }
         return null;
       };
@@ -33,7 +160,10 @@ const ProductSnapshotTracker = () => {
           const elem = item.getElementsByTagName(tag)[0];
           if (elem) {
             const price = parseFloat(elem.textContent.replace(/[^0-9.]/g, ''));
-            if (!isNaN(price)) return price;
+            if (!isNaN(price)) {
+              if (!detectedFields.price) detectedFields.price = tag;
+              return price;
+            }
           }
         }
         return 0;
@@ -43,26 +173,61 @@ const ProductSnapshotTracker = () => {
         for (let tag of tags) {
           const elem = item.getElementsByTagName(tag)[0];
           if (elem) {
-            const qty = parseInt(elem.textContent);
-            if (!isNaN(qty)) return qty;
+            const text = elem.textContent.trim().toLowerCase();
+            
+            // Handle Y/N format (Skroutz and others)
+            if (text === 'y' || text === 'yes' || text === 'true' || text === '1') {
+              if (!detectedFields.quantity) detectedFields.quantity = `${tag} (Y/N format)`;
+              return 999; // In stock
+            }
+            if (text === 'n' || text === 'no' || text === 'false' || text === '0' || text === '') {
+              if (!detectedFields.quantity) detectedFields.quantity = `${tag} (Y/N format)`;
+              return 0; // Out of stock
+            }
+            
+            // Handle text-based availability - more variations
+            const inStockPatterns = ['in stock', 'available', 'in-stock', 'σε απόθεμα', 'διαθέσιμο', 'instock'];
+            const outOfStockPatterns = ['out of stock', 'unavailable', 'out-of-stock', 'εξαντλημένο', 'μη διαθέσιμο', 'outofstock'];
+            
+            if (inStockPatterns.some(pattern => text.includes(pattern))) {
+              if (!detectedFields.quantity) detectedFields.quantity = `${tag} (text: "${text}")`;
+              return 999;
+            }
+            if (outOfStockPatterns.some(pattern => text.includes(pattern))) {
+              if (!detectedFields.quantity) detectedFields.quantity = `${tag} (text: "${text}")`;
+              return 0;
+            }
+            
+            // Try to parse as number
+            const qty = parseInt(text.replace(/[^0-9]/g, ''));
+            if (!isNaN(qty) && text.match(/\d/)) {
+              if (!detectedFields.quantity) detectedFields.quantity = `${tag} (numeric)`;
+              return qty;
+            }
           }
         }
-        return 0;
+        
+        // Default: if no quantity field found, assume in stock
+        if (!detectedFields.quantity) detectedFields.quantity = 'not found (assuming in stock)';
+        return 999;
       };
 
       const getName = (tags) => {
         for (let tag of tags) {
           const elem = item.getElementsByTagName(tag)[0];
-          if (elem) return elem.textContent;
+          if (elem) {
+            if (!detectedFields.name) detectedFields.name = tag;
+            return elem.textContent;
+          }
         }
         return 'Unknown Product';
       };
 
       const product = {
-        sku: getId(['id', 'sku', 'g:id', 'product_id']),
-        name: getName(['title', 'name', 'g:title', 'product_name']),
-        price: getPrice(['price', 'g:price', 'sale_price', 'product_price']),
-        quantity: getQuantity(['quantity', 'stock', 'availability', 'qty', 'stock_quantity'])
+        sku: getId(['id', 'sku', 'mpn', 'g:id', 'product_id', 'item_id', 'uniqueid', 'productid', 'code', 'barcode', 'ean', 'isbn']),
+        name: getName(['title', 'name', 'g:title', 'product_name', 'description', 'productname', 'item_name', 'g:description', 'product_title']),
+        price: getPrice(['price', 'g:price', 'sale_price', 'product_price', 'cost', 'baseprice', 'finalprice', 'price_with_vat', 'price_without_vat']),
+        quantity: getQuantity(['quantity', 'stock', 'availability', 'qty', 'stock_quantity', 'in_stock', 'instock', 'available', 'g:availability', 'stock_status'])
       };
 
       if (product.sku) {
@@ -70,48 +235,116 @@ const ProductSnapshotTracker = () => {
       }
     }
 
-    return products;
+    return { products, detectedFields };
   };
 
   const handleCreateSnapshot = async () => {
     setError('');
     setLoading(true);
+    setSnapshot(null);
 
     try {
       let xmlData = '';
+      let supplierName = '';
       
-      if (xmlUrl) {
-        // Use our proxy API to avoid CORS issues
-        const response = await fetch(`/api/fetch-xml?url=${encodeURIComponent(xmlUrl)}`);
-        if (!response.ok) throw new Error('Failed to fetch XML from URL');
+      // PRIORITY SYSTEM: File > URL > Manual Paste
+      // 1. Check for uploaded file FIRST (highest priority)
+      if (xmlFile) {
+        console.log('✅ Using FILE (Priority 1):', xmlFile.name);
+        xmlData = await new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = (e) => resolve(e.target.result);
+          reader.onerror = () => reject(new Error('Failed to read file'));
+          reader.readAsText(xmlFile);
+        });
+        console.log('File read, length:', xmlData.length);
+        
+        // Extract supplier name from filename (remove .xml extension)
+        supplierName = xmlFile.name.replace(/\.xml$/i, '').replace(/[^a-zA-Z0-9-_]/g, '-').toLowerCase();
+        
+      // 2. If no file, check for URL (second priority)
+      } else if (xmlUrl && xmlUrl.trim()) {
+        console.log('✅ Using URL (Priority 2):', xmlUrl);
+        const proxyUrl = `/api/fetch-xml?url=${encodeURIComponent(xmlUrl)}`;
+        console.log('Proxy URL:', proxyUrl);
+        
+        const response = await fetch(proxyUrl);
+        console.log('Response status:', response.status);
+        
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({ error: 'Failed to fetch XML' }));
+          console.error('Fetch error:', errorData);
+          throw new Error(errorData.error || `Server error: ${response.status}. The CORS proxy might not be working. Try uploading the XML file instead.`);
+        }
+        
         xmlData = await response.text();
+        console.log('XML fetched, length:', xmlData.length);
+        console.log('XML preview:', xmlData.substring(0, 500));
+        
+        // Extract supplier name from URL (domain name)
+        try {
+          const urlObj = new URL(xmlUrl);
+          supplierName = urlObj.hostname.replace('www.', '').split('.')[0];
+        } catch (e) {
+          supplierName = 'supplier';
+        }
+        
+        // Check if response is actually XML
+        if (!xmlData.trim().startsWith('<')) {
+          console.error('Response is not XML:', xmlData.substring(0, 200));
+          throw new Error('Server returned invalid response (not XML). The URL might be blocked. Try downloading the XML file and uploading it instead.');
+        }
+        
+      // 3. If no file or URL, check for manual paste (lowest priority)
+      } else if (xmlInput && xmlInput.trim()) {
+        console.log('✅ Using MANUAL PASTE (Priority 3)');
+        xmlData = xmlInput;
+        supplierName = 'manual';
+        
+      // 4. If nothing is provided, show error
+      } else {
+        throw new Error('Please provide an XML source:\n1. Upload an XML file (recommended)\n2. Or paste an XML URL\n3. Or paste XML content');
       }
 
-      const products = parseXML(xmlData);
+      // Parse XML
+      console.log('Parsing XML...');
+      const { products } = parseXML(xmlData);
+      console.log('Products parsed:', products.length);
       
       if (products.length === 0) {
-        throw new Error('No products found in XML. Please check the format.');
+        throw new Error('No products found in XML. Please check the XML format.');
       }
 
+      // Create snapshot with source info
+      const sourceType = xmlFile ? 'file' : (xmlUrl ? 'url' : 'manual');
       const snapshotData = {
         timestamp: new Date().toISOString(),
         date: new Date().toLocaleDateString('en-GB'),
+        source: supplierName,
+        sourceType: sourceType,
         products: products,
         totalProducts: products.length
       };
 
       setSnapshot(snapshotData);
       
+      // Download JSON file with supplier name
+      const dateStr = new Date().toISOString().split('T')[0];
+      const filename = `snapshot-${supplierName}-${dateStr}.json`;
+      
       const blob = new Blob([JSON.stringify(snapshotData, null, 2)], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `snapshot-${new Date().toISOString().split('T')[0]}.json`;
+      a.download = filename;
+      document.body.appendChild(a);
       a.click();
+      document.body.removeChild(a);
       URL.revokeObjectURL(url);
 
     } catch (err) {
-      setError(err.message);
+      console.error('Error:', err);
+      setError(err.message || 'Failed to create snapshot. Please check your XML and try again.');
     } finally {
       setLoading(false);
     }
@@ -274,20 +507,46 @@ const ProductSnapshotTracker = () => {
         {/* Create Snapshot Tab */}
         {activeTab === 'create' && (
           <div className="bg-slate-800 rounded-xl shadow-2xl p-8 border border-slate-700">
-            <h2 className="text-2xl font-semibold mb-6">Create New Snapshot</h2>
+            <h2 className="text-2xl font-semibold mb-2">Create New Snapshot</h2>
+            <p className="text-slate-400 text-sm mb-6">
+              Priority: File Upload → XML URL → Manual Paste. If you upload a file, it takes priority over URL.
+            </p>
             
             <div className="space-y-6">
               <div>
                 <label className="block text-sm font-medium text-slate-300 mb-2">
-                  XML Feed URL
+                  Upload XML File {xmlFile && <span className="text-blue-400">(Priority: This will be used)</span>}
                 </label>
-                <input
-                  type="text"
-                  placeholder="https://supplier.com/products.xml"
-                  value={xmlUrl}
-                  onChange={(e) => setXmlUrl(e.target.value)}
-                  className="w-full px-4 py-3 bg-slate-900 border border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-slate-100 placeholder-slate-500"
-                />
+                <div className="flex gap-2">
+                  <input
+                    type="file"
+                    accept=".xml"
+                    id="fileInput"
+                    onChange={(e) => {
+                      const file = e.target.files[0];
+                      setXmlFile(file);
+                      setSnapshot(null);
+                    }}
+                    className="flex-1 px-4 py-3 bg-slate-900 border border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 text-slate-100 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-blue-600 file:text-white file:cursor-pointer hover:file:bg-blue-700"
+                  />
+                  {xmlFile && (
+                    <button
+                      onClick={() => {
+                        setXmlFile(null);
+                        document.getElementById('fileInput').value = '';
+                      }}
+                      className="px-4 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors flex items-center gap-2"
+                      title="Clear file"
+                    >
+                      <span className="text-xl">×</span>
+                    </button>
+                  )}
+                </div>
+                {xmlFile && (
+                  <p className="mt-2 text-sm text-green-400 flex items-center gap-2">
+                    <span>✓</span> Selected: {xmlFile.name}
+                  </p>
+                )}
               </div>
 
               <div className="flex items-center gap-4">
@@ -298,15 +557,27 @@ const ProductSnapshotTracker = () => {
 
               <div>
                 <label className="block text-sm font-medium text-slate-300 mb-2">
-                  Paste XML Content
+                  XML Feed URL {!xmlFile && xmlUrl && <span className="text-blue-400">(This will be used)</span>}
+                  {xmlFile && <span className="text-slate-500">(File takes priority)</span>}
                 </label>
-                <textarea
-                  placeholder="<items>&#10;  <item>&#10;    <id>SKU123</id>&#10;    <title>Product Name</title>&#10;    <price>29.99</price>&#10;    <quantity>50</quantity>&#10;  </item>&#10;</items>"
-                  value={xmlInput}
-                  onChange={(e) => setXmlInput(e.target.value)}
-                  rows={8}
-                  className="w-full px-4 py-3 bg-slate-900 border border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono text-sm text-slate-100 placeholder-slate-500"
+                <input
+                  type="text"
+                  placeholder="https://supplier.com/products.xml"
+                  value={xmlUrl}
+                  onChange={(e) => {
+                    setXmlUrl(e.target.value);
+                    setSnapshot(null);
+                  }}
+                  disabled={xmlFile}
+                  className={`w-full px-4 py-3 bg-slate-900 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-slate-100 placeholder-slate-500 ${
+                    xmlFile ? 'border-slate-700 opacity-50 cursor-not-allowed' : 'border-slate-600'
+                  }`}
                 />
+                {xmlFile && (
+                  <p className="mt-2 text-xs text-slate-400">
+                    ⓘ URL input is disabled because a file is selected. Clear the file to use URL.
+                  </p>
+                )}
               </div>
 
               <button
@@ -752,10 +1023,42 @@ const ProductSnapshotTracker = () => {
             <div className="text-slate-500 text-sm space-y-1">
               <p>© 2025 B2B Data Tracker. All rights reserved.</p>
               <p>Created by Georgios Trochidis</p>
+              <div className="flex gap-4 justify-center mt-2">
+                <a href="/terms" className="hover:text-blue-400 transition-colors">Terms of Use</a>
+                <a href="/privacy" className="hover:text-blue-400 transition-colors">Privacy Policy</a>
+                <a href="/cookies" className="hover:text-blue-400 transition-colors">Cookie Policy</a>
+              </div>
             </div>
           </div>
         </div>
       </footer>
+
+      {/* Cookie Consent Banner */}
+      {cookieConsent === null && (
+        <div className="fixed bottom-0 left-0 right-0 bg-slate-800 border-t border-slate-700 p-6 shadow-2xl z-50">
+          <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+            <div className="flex-1">
+              <p className="text-slate-200 text-sm">
+                We use cookies to analyze website traffic and optimize your experience. By accepting, you agree to our use of cookies for analytics purposes.
+              </p>
+            </div>
+            <div className="flex gap-3">
+              <button
+                onClick={() => handleCookieConsent(false)}
+                className="px-6 py-2 bg-slate-700 text-slate-300 rounded-lg hover:bg-slate-600 transition-colors"
+              >
+                Decline
+              </button>
+              <button
+                onClick={() => handleCookieConsent(true)}
+                className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                Accept
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
