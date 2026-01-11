@@ -13,6 +13,9 @@ const ProductSnapshotTracker = () => {
   const [error, setError] = useState('');
   const [openFaq, setOpenFaq] = useState(null);
   const [cookieConsent, setCookieConsent] = useState(null);
+  const [sortConfig, setSortConfig] = useState({ key: 'change', direction: 'desc' });
+  const [filterCategory, setFilterCategory] = useState('all');
+  const [searchTerm, setSearchTerm] = useState('');
 
   // Check cookie consent on mount
   React.useEffect(() => {
@@ -45,6 +48,77 @@ const ProductSnapshotTracker = () => {
   const handleCookieConsent = (accepted) => {
     setCookieConsent(accepted);
     localStorage.setItem('cookieConsent', accepted ? 'accepted' : 'declined');
+  };
+
+  const sortData = (data, key, direction) => {
+    return [...data].sort((a, b) => {
+      const aVal = a[key];
+      const bVal = b[key];
+      if (direction === 'asc') {
+        return aVal > bVal ? 1 : -1;
+      }
+      return aVal < bVal ? 1 : -1;
+    });
+  };
+
+  const handleSort = (key) => {
+    setSortConfig(prev => ({
+      key,
+      direction: prev.key === key && prev.direction === 'desc' ? 'asc' : 'desc'
+    }));
+  };
+
+  const getAllChanges = () => {
+    if (!comparison) return [];
+    
+    const all = [
+      ...comparison.changes.quantityDecreased.map(p => ({ ...p, type: 'stock_down', category: 'Hot Seller' })),
+      ...comparison.changes.quantityIncreased.map(p => ({ ...p, type: 'stock_up', category: 'Stock Increase' })),
+      ...comparison.changes.priceIncreased.map(p => ({ ...p, type: 'price_up', category: 'Price Increase' })),
+      ...comparison.changes.priceDecreased.map(p => ({ ...p, type: 'price_down', category: 'Price Decrease' })),
+      ...comparison.changes.newProducts.map(p => ({ ...p, type: 'new', category: 'New Product', change: 0, oldQuantity: 0, oldPrice: 0 }))
+    ];
+    
+    // Filter by category
+    let filtered = filterCategory === 'all' ? all : all.filter(p => p.type === filterCategory);
+    
+    // Filter by search term
+    if (searchTerm) {
+      filtered = filtered.filter(p => 
+        p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        p.sku.toString().includes(searchTerm)
+      );
+    }
+    
+    // Sort
+    return sortData(filtered, sortConfig.key, sortConfig.direction);
+  };
+
+  const exportToCSV = () => {
+    if (!comparison) return;
+    
+    const changes = getAllChanges();
+    const headers = ['SKU', 'Product Name', 'Category', 'Old Price', 'New Price', 'Price Change', 'Old Stock', 'New Stock', 'Stock Change'];
+    const rows = changes.map(p => [
+      p.sku,
+      p.name,
+      p.category,
+      p.oldPrice || p.price,
+      p.price,
+      p.type.includes('price') ? (p.change * (p.type === 'price_up' ? 1 : -1)).toFixed(2) : '0',
+      p.oldQuantity || p.quantity,
+      p.quantity,
+      p.type.includes('stock') ? (p.change * (p.type === 'stock_up' ? 1 : -1)) : '0'
+    ]);
+    
+    const csv = [headers, ...rows].map(row => row.map(cell => `"${cell}"`).join(',')).join('\n');
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `comparison-${new Date().toISOString().split('T')[0]}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
   };
 
   const sanitizeXML = (xmlString) => {
@@ -692,7 +766,7 @@ const ProductSnapshotTracker = () => {
                 {/* Charts */}
                 <div className="grid md:grid-cols-2 gap-6">
                   <div className="bg-slate-900/50 p-6 rounded-lg border border-slate-700">
-                    <h3 className="text-lg font-semibold mb-4">Change Distribution</h3>
+                    <h3 className="text-lg font-semibold text-slate-200 mb-4">Change Distribution</h3>
                     <ResponsiveContainer width="100%" height={250}>
                       <PieChart>
                         <Pie
@@ -722,7 +796,7 @@ const ProductSnapshotTracker = () => {
                   </div>
 
                   <div className="bg-slate-900/50 p-6 rounded-lg border border-slate-700">
-                    <h3 className="text-lg font-semibold mb-4">Top Price Changes</h3>
+                    <h3 className="text-lg font-semibold text-slate-200 mb-4">Top Price Changes</h3>
                     <ResponsiveContainer width="100%" height={250}>
                       <BarChart data={[...comparison.changes.priceIncreased, ...comparison.changes.priceDecreased]
                         .sort((a, b) => Math.abs(b.change) - Math.abs(a.change))
@@ -737,190 +811,146 @@ const ProductSnapshotTracker = () => {
                   </div>
                 </div>
 
-                {/* Detailed Changes - VISUAL CARDS */}
-                <div className="space-y-6">
-                  {/* Stock Increases */}
-                  {comparison.changes.quantityIncreased.length > 0 && (
-                    <div className="bg-slate-800/50 border border-slate-700 rounded-lg p-6">
-                      <h3 className="text-xl font-semibold text-green-400 mb-4 flex items-center gap-2">
-                        📈 Stock Increases ({comparison.changes.quantityIncreased.length})
-                      </h3>
-                      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        {comparison.changes.quantityIncreased.slice(0, 9).map((p, i) => (
-                          <div key={i} className="bg-slate-900/70 border border-green-500/30 rounded-lg p-4 hover:border-green-500/50 transition-all">
-                            <div className="flex items-start justify-between mb-2">
-                              <span className="text-xs text-slate-400">SKU: {p.sku}</span>
-                              <span className="bg-green-500/20 text-green-400 text-xs px-2 py-1 rounded font-semibold">
-                                +{p.change}
-                              </span>
+                {/* Top Highlights - Cards (Top 6 Hot Sellers) */}
+                {comparison.changes.quantityDecreased.length > 0 && (
+                  <div className="bg-slate-800/50 border border-slate-700 rounded-lg p-6">
+                    <h3 className="text-xl font-semibold text-orange-400 mb-2 flex items-center gap-2">
+                      🔥 Top Hot Sellers
+                    </h3>
+                    <p className="text-sm text-slate-400 mb-4">These products are selling the fastest. Stock is decreasing rapidly.</p>
+                    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {comparison.changes.quantityDecreased
+                        .sort((a, b) => b.change - a.change)
+                        .slice(0, 6)
+                        .map((p, i) => (
+                        <div key={i} className="bg-slate-900/70 border border-orange-500/30 rounded-lg p-4 hover:border-orange-500/50 transition-all">
+                          <div className="flex items-start justify-between mb-2">
+                            <span className="text-xs text-slate-400">SKU: {p.sku}</span>
+                            <span className="bg-orange-500/20 text-orange-400 text-xs px-2 py-1 rounded font-semibold">
+                              -{p.change}
+                            </span>
+                          </div>
+                          <h4 className="text-sm font-medium text-white mb-3 line-clamp-2">{p.name}</h4>
+                          <div className="flex items-center justify-between">
+                            <div className="text-center">
+                              <p className="text-xs text-slate-500">Before</p>
+                              <p className="text-lg font-bold text-slate-300">{p.oldQuantity}</p>
                             </div>
-                            <h4 className="text-sm font-medium text-white mb-3 line-clamp-2">{p.name}</h4>
-                            <div className="flex items-center justify-between">
-                              <div className="text-center">
-                                <p className="text-xs text-slate-500">Before</p>
-                                <p className="text-lg font-bold text-slate-300">{p.oldQuantity}</p>
-                              </div>
-                              <div className="text-green-400">→</div>
-                              <div className="text-center">
-                                <p className="text-xs text-slate-500">After</p>
-                                <p className="text-lg font-bold text-green-400">{p.quantity}</p>
-                              </div>
+                            <div className="text-orange-400">→</div>
+                            <div className="text-center">
+                              <p className="text-xs text-slate-500">After</p>
+                              <p className="text-lg font-bold text-orange-400">{p.quantity}</p>
                             </div>
                           </div>
-                        ))}
-                      </div>
-                      {comparison.changes.quantityIncreased.length > 9 && (
-                        <p className="text-center text-slate-400 text-sm mt-4">
-                          + {comparison.changes.quantityIncreased.length - 9} more items
-                        </p>
-                      )}
+                          {p.quantity < 10 && p.change > 5 && (
+                            <div className="mt-2 bg-red-500/20 border border-red-500/30 rounded px-2 py-1">
+                              <p className="text-xs text-red-400 font-semibold">⚠️ Low Stock!</p>
+                            </div>
+                          )}
+                        </div>
+                      ))}
                     </div>
-                  )}
+                  </div>
+                )}
 
-                  {/* Stock Decreases - HOT SELLERS! */}
-                  {comparison.changes.quantityDecreased.length > 0 && (
-                    <div className="bg-slate-800/50 border border-slate-700 rounded-lg p-6">
-                      <h3 className="text-xl font-semibold text-orange-400 mb-4 flex items-center gap-2">
-                        🔥 Hot Sellers - Stock Decreased ({comparison.changes.quantityDecreased.length})
-                      </h3>
-                      <p className="text-sm text-orange-300 mb-4">These products are selling fast! Consider restocking.</p>
-                      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        {comparison.changes.quantityDecreased
-                          .sort((a, b) => b.change - a.change)
-                          .slice(0, 9)
-                          .map((p, i) => (
-                          <div key={i} className="bg-slate-900/70 border border-orange-500/30 rounded-lg p-4 hover:border-orange-500/50 transition-all">
-                            <div className="flex items-start justify-between mb-2">
-                              <span className="text-xs text-slate-400">SKU: {p.sku}</span>
-                              <span className="bg-orange-500/20 text-orange-400 text-xs px-2 py-1 rounded font-semibold">
-                                -{p.change}
-                              </span>
-                            </div>
-                            <h4 className="text-sm font-medium text-white mb-3 line-clamp-2">{p.name}</h4>
-                            <div className="flex items-center justify-between">
-                              <div className="text-center">
-                                <p className="text-xs text-slate-500">Before</p>
-                                <p className="text-lg font-bold text-slate-300">{p.oldQuantity}</p>
-                              </div>
-                              <div className="text-orange-400">→</div>
-                              <div className="text-center">
-                                <p className="text-xs text-slate-500">After</p>
-                                <p className="text-lg font-bold text-orange-400">{p.quantity}</p>
-                              </div>
-                            </div>
-                            {p.quantity < 10 && p.change > 5 && (
-                              <div className="mt-2 bg-red-500/20 border border-red-500/30 rounded px-2 py-1">
-                                <p className="text-xs text-red-400 font-semibold">⚠️ Low Stock Alert!</p>
-                              </div>
-                            )}
-                          </div>
-                        ))}
-                      </div>
-                      {comparison.changes.quantityDecreased.length > 9 && (
-                        <p className="text-center text-slate-400 text-sm mt-4">
-                          + {comparison.changes.quantityDecreased.length - 9} more items
-                        </p>
-                      )}
-                    </div>
-                  )}
+                {/* Full Data Table */}
+                <div className="bg-slate-800/50 border border-slate-700 rounded-lg p-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-xl font-semibold">All Changes</h3>
+                    <button
+                      onClick={exportToCSV}
+                      className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2 text-sm"
+                    >
+                      <Download className="w-4 h-4" />
+                      Export CSV
+                    </button>
+                  </div>
 
-                  {/* Price Increases */}
-                  {comparison.changes.priceIncreased.length > 0 && (
-                    <div className="bg-slate-800/50 border border-slate-700 rounded-lg p-6">
-                      <h3 className="text-xl font-semibold text-red-400 mb-4 flex items-center gap-2">
-                        💰 Price Increases ({comparison.changes.priceIncreased.length})
-                      </h3>
-                      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        {comparison.changes.priceIncreased.slice(0, 6).map((p, i) => (
-                          <div key={i} className="bg-slate-900/70 border border-red-500/30 rounded-lg p-4 hover:border-red-500/50 transition-all">
-                            <div className="flex items-start justify-between mb-2">
-                              <span className="text-xs text-slate-400">SKU: {p.sku}</span>
-                              <span className="bg-red-500/20 text-red-400 text-xs px-2 py-1 rounded font-semibold">
-                                +€{p.change.toFixed(2)}
-                              </span>
-                            </div>
-                            <h4 className="text-sm font-medium text-white mb-3 line-clamp-2">{p.name}</h4>
-                            <div className="flex items-center justify-between">
-                              <div className="text-center">
-                                <p className="text-xs text-slate-500">Before</p>
-                                <p className="text-lg font-bold text-slate-300">€{p.oldPrice.toFixed(2)}</p>
-                              </div>
-                              <div className="text-red-400">→</div>
-                              <div className="text-center">
-                                <p className="text-xs text-slate-500">After</p>
-                                <p className="text-lg font-bold text-red-400">€{p.price.toFixed(2)}</p>
-                              </div>
-                            </div>
-                            <div className="mt-2 text-center">
-                              <span className="text-xs text-red-400">
-                                +{((p.change / p.oldPrice) * 100).toFixed(1)}% increase
-                              </span>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
+                  {/* Filters */}
+                  <div className="flex flex-col md:flex-row gap-4 mb-4">
+                    <input
+                      type="text"
+                      placeholder="Search by name or SKU..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="flex-1 px-4 py-2 bg-slate-900 border border-slate-600 rounded-lg text-slate-100 text-sm"
+                    />
+                    <select
+                      value={filterCategory}
+                      onChange={(e) => setFilterCategory(e.target.value)}
+                      className="px-4 py-2 bg-slate-900 border border-slate-600 rounded-lg text-slate-100 text-sm"
+                    >
+                      <option value="all">All Categories</option>
+                      <option value="stock_down">Hot Sellers (Stock ↓)</option>
+                      <option value="stock_up">Stock Increases</option>
+                      <option value="price_up">Price Increases</option>
+                      <option value="price_down">Price Decreases</option>
+                      <option value="new">New Products</option>
+                    </select>
+                  </div>
 
-                  {/* Price Decreases */}
-                  {comparison.changes.priceDecreased.length > 0 && (
-                    <div className="bg-slate-800/50 border border-slate-700 rounded-lg p-6">
-                      <h3 className="text-xl font-semibold text-green-400 mb-4 flex items-center gap-2">
-                        💸 Price Decreases ({comparison.changes.priceDecreased.length})
-                      </h3>
-                      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        {comparison.changes.priceDecreased.slice(0, 6).map((p, i) => (
-                          <div key={i} className="bg-slate-900/70 border border-green-500/30 rounded-lg p-4 hover:border-green-500/50 transition-all">
-                            <div className="flex items-start justify-between mb-2">
-                              <span className="text-xs text-slate-400">SKU: {p.sku}</span>
-                              <span className="bg-green-500/20 text-green-400 text-xs px-2 py-1 rounded font-semibold">
-                                -€{p.change.toFixed(2)}
+                  {/* Table */}
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-sm">
+                      <thead className="bg-slate-900/50 border-b border-slate-700">
+                        <tr>
+                          <th className="text-left p-3 text-slate-400 font-medium cursor-pointer hover:text-slate-200" onClick={() => handleSort('sku')}>
+                            SKU {sortConfig.key === 'sku' && (sortConfig.direction === 'desc' ? '↓' : '↑')}
+                          </th>
+                          <th className="text-left p-3 text-slate-400 font-medium cursor-pointer hover:text-slate-200" onClick={() => handleSort('name')}>
+                            Product {sortConfig.key === 'name' && (sortConfig.direction === 'desc' ? '↓' : '↑')}
+                          </th>
+                          <th className="text-left p-3 text-slate-400 font-medium">Category</th>
+                          <th className="text-right p-3 text-slate-400 font-medium cursor-pointer hover:text-slate-200" onClick={() => handleSort('change')}>
+                            Change {sortConfig.key === 'change' && (sortConfig.direction === 'desc' ? '↓' : '↑')}
+                          </th>
+                          <th className="text-right p-3 text-slate-400 font-medium">Old Value</th>
+                          <th className="text-right p-3 text-slate-400 font-medium">New Value</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {getAllChanges().map((item, i) => (
+                          <tr key={i} className="border-b border-slate-700/50 hover:bg-slate-900/30 transition-colors">
+                            <td className="p-3 text-slate-300 font-mono">{item.sku}</td>
+                            <td className="p-3 text-slate-200">{item.name}</td>
+                            <td className="p-3">
+                              <span className={`inline-block px-2 py-1 rounded text-xs font-semibold ${
+                                item.type === 'stock_down' ? 'bg-orange-500/20 text-orange-400' :
+                                item.type === 'stock_up' ? 'bg-green-500/20 text-green-400' :
+                                item.type === 'price_up' ? 'bg-red-500/20 text-red-400' :
+                                item.type === 'price_down' ? 'bg-green-500/20 text-green-400' :
+                                'bg-purple-500/20 text-purple-400'
+                              }`}>
+                                {item.category}
                               </span>
-                            </div>
-                            <h4 className="text-sm font-medium text-white mb-3 line-clamp-2">{p.name}</h4>
-                            <div className="flex items-center justify-between">
-                              <div className="text-center">
-                                <p className="text-xs text-slate-500">Before</p>
-                                <p className="text-lg font-bold text-slate-300">€{p.oldPrice.toFixed(2)}</p>
-                              </div>
-                              <div className="text-green-400">→</div>
-                              <div className="text-center">
-                                <p className="text-xs text-slate-500">After</p>
-                                <p className="text-lg font-bold text-green-400">€{p.price.toFixed(2)}</p>
-                              </div>
-                            </div>
-                            <div className="mt-2 text-center">
-                              <span className="text-xs text-green-400">
-                                -{((p.change / p.oldPrice) * 100).toFixed(1)}% discount
-                              </span>
-                            </div>
-                          </div>
+                            </td>
+                            <td className={`p-3 text-right font-bold ${
+                              item.type === 'stock_down' || item.type === 'price_up' ? 'text-orange-400' :
+                              item.type === 'stock_up' || item.type === 'price_down' ? 'text-green-400' :
+                              'text-purple-400'
+                            }`}>
+                              {item.type === 'new' ? 'NEW' :
+                               item.type.includes('price') ? `€${item.change.toFixed(2)}` :
+                               item.change}
+                            </td>
+                            <td className="p-3 text-right text-slate-400">
+                              {item.type.includes('price') ? `€${(item.oldPrice || item.price).toFixed(2)}` :
+                               item.type.includes('stock') ? (item.oldQuantity || item.quantity) :
+                               '-'}
+                            </td>
+                            <td className="p-3 text-right text-slate-200 font-medium">
+                              {item.type.includes('price') ? `€${item.price.toFixed(2)}` :
+                               item.quantity}
+                            </td>
+                          </tr>
                         ))}
-                      </div>
-                    </div>
-                  )}
+                      </tbody>
+                    </table>
+                  </div>
 
-                  {/* New Products */}
-                  {comparison.changes.newProducts.length > 0 && (
-                    <div className="bg-slate-800/50 border border-slate-700 rounded-lg p-6">
-                      <h3 className="text-xl font-semibold text-purple-400 mb-4 flex items-center gap-2">
-                        ✨ New Products Added ({comparison.changes.newProducts.length})
-                      </h3>
-                      <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
-                        {comparison.changes.newProducts.slice(0, 8).map((p, i) => (
-                          <div key={i} className="bg-slate-900/70 border border-purple-500/30 rounded-lg p-4 hover:border-purple-500/50 transition-all">
-                            <span className="bg-purple-500/20 text-purple-400 text-xs px-2 py-1 rounded font-semibold">NEW</span>
-                            <h4 className="text-sm font-medium text-white mt-2 mb-2 line-clamp-2">{p.name}</h4>
-                            <p className="text-xs text-slate-400 mb-2">SKU: {p.sku}</p>
-                            <div className="flex items-center justify-between">
-                              <span className="text-green-400 font-bold">€{p.price.toFixed(2)}</span>
-                              <span className="text-xs text-slate-400">{p.quantity} units</span>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
+                  <p className="text-sm text-slate-400 mt-4">
+                    Showing {getAllChanges().length} of {comparison.summary.totalChanges} changes
+                  </p>
                 </div>
 
                 <button
