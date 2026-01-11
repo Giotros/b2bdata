@@ -4,8 +4,8 @@
 // In-memory storage (replace with database in production)
 let analyticsData = [];
 
-// Admin password (should be environment variable in production)
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'admin123';
+// Admin password from environment variable (required for production)
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
 
 export default async function handler(req, res) {
   // CORS headers

@@ -9,10 +9,17 @@ dist/
 build/
 .vite/
 
-# Environment variables
+# Environment variables - NEVER commit these
 .env
 .env.local
 .env.production
+.env.example
+
+# Private documentation with deployment credentials
+ANALYTICS.md
+DEPLOYMENT.md
+DEPLOY_NOW.md
+SETUP_COMPLETE.md
 
 # IDE
 .vscode/

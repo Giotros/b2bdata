@@ -69,9 +69,7 @@ const AdminLogin = ({ onLogin }) => {
 
           <div className="mt-6 pt-6 border-t border-gray-200">
             <p className="text-xs text-gray-500 text-center">
-              Default password: admin123
-              <br />
-              <span className="text-red-500">Change this in production!</span>
+              Secure admin access with environment-based authentication
             </p>
           </div>
         </div>
