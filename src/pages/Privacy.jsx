@@ -127,7 +127,7 @@ const PrivacyPolicy = () => {
               <li><strong>Object:</strong> Object to data processing</li>
             </ul>
             <p className="text-slate-300 leading-relaxed mt-3">
-              To exercise these rights, contact us at b2bdata.net.
+              To exercise these rights, contact us at <a href="mailto:info@b2bdata.net" className="text-blue-400 hover:text-blue-300 underline">info@b2bdata.net</a>.
             </p>
           </section>
 
@@ -155,7 +155,7 @@ const PrivacyPolicy = () => {
           <section>
             <h2 className="text-2xl font-semibold text-blue-400 mb-4">12. Contact Us</h2>
             <p className="text-slate-300 leading-relaxed">
-              For questions about this Privacy Policy or your data, please contact us at b2bdata.net.
+              For questions about this Privacy Policy or your data, please contact us at <a href="mailto:info@b2bdata.net" className="text-blue-400 hover:text-blue-300 underline">info@b2bdata.net</a>.
             </p>
           </section>
 

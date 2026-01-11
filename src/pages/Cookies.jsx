@@ -154,7 +154,7 @@ const CookiePolicy = () => {
           <section>
             <h2 className="text-2xl font-semibold text-blue-400 mb-4">9. Contact Us</h2>
             <p className="text-slate-300 leading-relaxed">
-              If you have questions about our use of cookies, please contact us at b2bdata.net or review our Privacy Policy for more information.
+              If you have questions about our use of cookies, please contact us at <a href="mailto:info@b2bdata.net" className="text-blue-400 hover:text-blue-300 underline">info@b2bdata.net</a> or review our <a href="/privacy" className="text-blue-400 hover:text-blue-300 underline">Privacy Policy</a> for more information.
             </p>
           </section>
 
