@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Upload, FileJson, GitCompare, TrendingUp, Calendar, Download, AlertCircle, Zap, Shield, Clock, BarChart3, ChevronDown } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
+import analytics from './utils/analytics';
 
 const ProductSnapshotTracker = () => {
   const [activeTab, setActiveTab] = useState('create');
@@ -25,29 +26,17 @@ const ProductSnapshotTracker = () => {
     }
   }, []);
 
-  // Load Google Analytics if consented
+  // Track page view on mount
   React.useEffect(() => {
-    if (cookieConsent === true && typeof window.gtag === 'undefined') {
-      // Load Google Analytics
-      const script1 = document.createElement('script');
-      script1.async = true;
-      script1.src = 'https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX'; // Replace with your GA ID
-      document.head.appendChild(script1);
-
-      const script2 = document.createElement('script');
-      script2.innerHTML = `
-        window.dataLayer = window.dataLayer || [];
-        function gtag(){dataLayer.push(arguments);}
-        gtag('js', new Date());
-        gtag('config', 'G-XXXXXXXXXX'); // Replace with your GA ID
-      `;
-      document.head.appendChild(script2);
+    if (cookieConsent === true) {
+      analytics.trackPageView();
     }
   }, [cookieConsent]);
 
   const handleCookieConsent = (accepted) => {
     setCookieConsent(accepted);
     localStorage.setItem('cookieConsent', accepted ? 'accepted' : 'declined');
+    analytics.trackCookieConsent(accepted);
   };
 
   const sortData = (data, key, direction) => {
@@ -96,7 +85,7 @@ const ProductSnapshotTracker = () => {
 
   const exportToCSV = () => {
     if (!comparison) return;
-    
+
     const changes = getAllChanges();
     const headers = ['SKU', 'Product Name', 'Category', 'Old Price', 'New Price', 'Price Change', 'Old Stock', 'New Stock', 'Stock Change'];
     const rows = changes.map(p => [
@@ -110,7 +99,7 @@ const ProductSnapshotTracker = () => {
       p.quantity,
       p.type.includes('stock') ? (p.change * (p.type === 'stock_up' ? 1 : -1)) : '0'
     ]);
-    
+
     const csv = [headers, ...rows].map(row => row.map(cell => `"${cell}"`).join(',')).join('\n');
     const blob = new Blob([csv], { type: 'text/csv' });
     const url = URL.createObjectURL(blob);
@@ -119,6 +108,10 @@ const ProductSnapshotTracker = () => {
     a.download = `comparison-${new Date().toISOString().split('T')[0]}.csv`;
     a.click();
     URL.revokeObjectURL(url);
+
+    if (cookieConsent) {
+      analytics.trackCsvExport(changes.length);
+    }
   };
 
   const sanitizeXML = (xmlString) => {
@@ -401,11 +394,11 @@ const ProductSnapshotTracker = () => {
       };
 
       setSnapshot(snapshotData);
-      
+
       // Download JSON file with supplier name
       const dateStr = new Date().toISOString().split('T')[0];
       const filename = `snapshot-${supplierName}-${dateStr}.json`;
-      
+
       const blob = new Blob([JSON.stringify(snapshotData, null, 2)], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -416,9 +409,17 @@ const ProductSnapshotTracker = () => {
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
 
+      if (cookieConsent) {
+        analytics.trackSnapshotCreated(sourceType, products.length);
+        analytics.trackSnapshotDownload();
+      }
+
     } catch (err) {
       console.error('Error:', err);
       setError(err.message || 'Failed to create snapshot. Please check your XML and try again.');
+      if (cookieConsent) {
+        analytics.trackError('snapshot_creation', err.message);
+      }
     } finally {
       setLoading(false);
     }
@@ -437,19 +438,31 @@ const ProductSnapshotTracker = () => {
         
         reader2.onload = (e2) => {
           const snapshot2 = JSON.parse(e2.target.result);
-          
+
           const comparison = compareSnapshots(snapshot1, snapshot2);
           setComparison(comparison);
+
+          if (cookieConsent) {
+            analytics.trackComparisonMade(
+              comparison.summary.totalChanges,
+              comparison.changes.newProducts.length,
+              comparison.changes.removedProducts.length
+            );
+          }
+
           setLoading(false);
         };
-        
+
         reader2.readAsText(file2);
       };
-      
+
       reader1.readAsText(file1);
 
     } catch (err) {
       setError('Error reading files. Please ensure they are valid JSON snapshots.');
+      if (cookieConsent) {
+        analytics.trackError('comparison', err.message);
+      }
       setLoading(false);
     }
   };
@@ -1185,21 +1198,21 @@ const ProductSnapshotTracker = () => {
           <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
             <div className="flex-1">
               <p className="text-slate-200 text-sm">
-                We use cookies to analyze website traffic and optimize your experience. By accepting, you agree to our use of cookies for analytics purposes.
+                We use essential cookies to analyze website traffic and optimize your experience. Your data is processed locally and never shared with third parties. By accepting, you help us improve the tool.
               </p>
             </div>
             <div className="flex gap-3">
               <button
                 onClick={() => handleCookieConsent(false)}
-                className="px-6 py-2 bg-slate-700 text-slate-300 rounded-lg hover:bg-slate-600 transition-colors"
+                className="px-6 py-2 bg-slate-700 text-slate-300 rounded-lg hover:bg-slate-600 transition-colors text-sm"
               >
                 Decline
               </button>
               <button
                 onClick={() => handleCookieConsent(true)}
-                className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm"
               >
-                Accept
+                Accept Analytics
               </button>
             </div>
           </div>

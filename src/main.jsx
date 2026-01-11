@@ -5,6 +5,7 @@ import App from './App.jsx'
 import TermsOfUse from './pages/Terms.jsx'
 import PrivacyPolicy from './pages/Privacy.jsx'
 import CookiePolicy from './pages/Cookies.jsx'
+import Admin from './pages/Admin.jsx'
 import './index.css'
 
 ReactDOM.createRoot(document.getElementById('root')).render(
@@ -15,6 +16,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
         <Route path="/terms" element={<TermsOfUse />} />
         <Route path="/privacy" element={<PrivacyPolicy />} />
         <Route path="/cookies" element={<CookiePolicy />} />
+        <Route path="/admin" element={<Admin />} />
       </Routes>
     </BrowserRouter>
   </React.StrictMode>,

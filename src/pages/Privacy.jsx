@@ -35,15 +35,18 @@ const PrivacyPolicy = () => {
             
             <h3 className="text-xl font-semibold text-slate-200 mb-3 mt-4">2.1 Analytics Data</h3>
             <p className="text-slate-300 leading-relaxed mb-3">
-              When you consent to cookies, we collect analytics data through Google Analytics, including:
+              When you consent to cookies, we collect privacy-friendly analytics data through our own self-hosted analytics system, including:
             </p>
             <ul className="list-disc list-inside text-slate-300 space-y-2 ml-4">
-              <li>Pages visited and features used</li>
-              <li>Time spent on the website</li>
-              <li>Browser type and device information</li>
-              <li>Geographic location (country/city level)</li>
+              <li>Pages visited and features used (snapshots created, comparisons made)</li>
+              <li>Anonymous session identifiers (no personal data)</li>
+              <li>Browser type and device information (user agent, screen resolution)</li>
+              <li>Language preference</li>
               <li>Referral source (how you found our site)</li>
             </ul>
+            <p className="text-slate-300 leading-relaxed mt-3">
+              <strong>Important:</strong> We do NOT use third-party analytics services like Google Analytics. All analytics are processed on our own servers and are never shared with external parties.
+            </p>
 
             <h3 className="text-xl font-semibold text-slate-200 mb-3 mt-6">2.2 XML Data</h3>
             <p className="text-slate-300 leading-relaxed">
@@ -82,14 +85,13 @@ const PrivacyPolicy = () => {
           <section>
             <h2 className="text-2xl font-semibold text-blue-400 mb-4">5. Data Sharing and Third Parties</h2>
             <p className="text-slate-300 leading-relaxed mb-3">
-              We share data with the following third-party services:
+              We share minimal data with the following service:
             </p>
             <ul className="list-disc list-inside text-slate-300 space-y-2 ml-4">
-              <li><strong>Google Analytics:</strong> For website analytics (only if you consent to cookies)</li>
               <li><strong>Vercel:</strong> Our hosting provider (for infrastructure and performance)</li>
             </ul>
             <p className="text-slate-300 leading-relaxed mt-3">
-              We do NOT sell, rent, or trade your personal data to third parties for marketing purposes.
+              We do NOT use third-party analytics services. We do NOT sell, rent, or trade your personal data to third parties for any purpose.
             </p>
           </section>
 
@@ -99,18 +101,18 @@ const PrivacyPolicy = () => {
               We use cookies for:
             </p>
             <ul className="list-disc list-inside text-slate-300 space-y-2 ml-4">
-              <li><strong>Essential Cookies:</strong> To remember your cookie consent preference (stored locally)</li>
-              <li><strong>Analytics Cookies:</strong> Google Analytics tracking (only if you accept cookies)</li>
+              <li><strong>Essential Cookies:</strong> To remember your cookie consent preference (stored locally in your browser)</li>
+              <li><strong>Analytics Session ID:</strong> Anonymous session identifier for tracking usage patterns (only if you accept cookies)</li>
             </ul>
             <p className="text-slate-300 leading-relaxed mt-3">
-              You can decline cookies at any time. Declining will only affect analytics tracking; the core functionality of the Service will remain available.
+              You can decline cookies at any time. Declining will only affect analytics tracking; the core functionality of the Service will remain fully available.
             </p>
           </section>
 
           <section>
             <h2 className="text-2xl font-semibold text-blue-400 mb-4">7. Data Retention</h2>
             <p className="text-slate-300 leading-relaxed">
-              Analytics data is retained according to Google Analytics' retention policies (default: 26 months). Your XML data and snapshots are NEVER stored on our servers—they remain only in your browser.
+              Analytics data is retained for operational purposes only and automatically purged when storage limits are reached. Your XML data and snapshots are NEVER stored on our servers—they remain only in your browser.
             </p>
           </section>
 

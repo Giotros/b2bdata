@@ -52,16 +52,19 @@ const CookiePolicy = () => {
             <div className="bg-slate-800 border border-slate-700 rounded-lg p-6">
               <h3 className="text-xl font-semibold text-blue-400 mb-3">Analytics Cookies (Optional)</h3>
               <p className="text-slate-300 leading-relaxed mb-3">
-                <strong>Provider:</strong> Google Analytics
+                <strong>Provider:</strong> Self-hosted (B2B Data Tracker)
               </p>
               <p className="text-slate-300 leading-relaxed mb-3">
-                <strong>Purpose:</strong> Understand website usage, visitor behavior, and performance metrics
+                <strong>Purpose:</strong> Understand website usage, feature popularity, and user behavior to improve the tool
               </p>
               <p className="text-slate-300 leading-relaxed mb-3">
-                <strong>Data collected:</strong> Page views, time on site, device type, location (city-level), referral source
+                <strong>Data collected:</strong> Anonymous session ID, feature usage (snapshots created, comparisons made), browser info, language, referral source
               </p>
               <p className="text-slate-300 leading-relaxed mb-3">
-                <strong>Duration:</strong> Up to 26 months
+                <strong>Duration:</strong> Session-based (expires when you close your browser)
+              </p>
+              <p className="text-slate-300 leading-relaxed mb-3">
+                <strong>Third-party sharing:</strong> None - all data stays on our servers
               </p>
               <p className="text-slate-300 leading-relaxed">
                 <strong>Can you decline?</strong> Yes - Decline or accept via the cookie banner
@@ -84,16 +87,10 @@ const CookiePolicy = () => {
 
           <section>
             <h2 className="text-2xl font-semibold text-blue-400 mb-4">4. Third-Party Cookies</h2>
-            <p className="text-slate-300 leading-relaxed mb-3">
-              When you accept cookies, we use:
-            </p>
-            <div className="bg-slate-800 border border-slate-700 rounded-lg p-6">
-              <h3 className="text-lg font-semibold text-slate-200 mb-3">Google Analytics</h3>
-              <p className="text-slate-300 leading-relaxed mb-2">
-                Google Analytics sets cookies to track anonymous usage statistics. Google may use this data in accordance with their own privacy policy.
-              </p>
+            <div className="bg-green-900/30 border border-green-500/30 rounded-lg p-6">
+              <h3 className="text-lg font-semibold text-green-400 mb-3">Good News!</h3>
               <p className="text-slate-300 leading-relaxed">
-                <strong>Learn more:</strong> <a href="https://policies.google.com/privacy" className="text-blue-400 hover:text-blue-300">Google Privacy Policy</a>
+                We do NOT use any third-party cookies or tracking services. All analytics are processed on our own servers, giving you complete privacy and control over your data.
               </p>
             </div>
           </section>
