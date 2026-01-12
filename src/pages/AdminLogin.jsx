@@ -5,7 +5,22 @@ const AdminLogin = ({ onLogin }) => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [debugInfo, setDebugInfo] = useState(null);
+
+  const handleBypass = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    console.log('Bypass button clicked');
+    const testToken = 'bypass-token-' + Date.now();
+    
+    // Store in sessionStorage
+    sessionStorage.setItem('adminAuth', testToken);
+    console.log('Token saved to sessionStorage:', testToken);
+    
+    // Call the login handler
+    onLogin(testToken);
+    console.log('onLogin called');
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -17,7 +32,6 @@ const AdminLogin = ({ onLogin }) => {
 
     setIsLoading(true);
     setError('');
-    setDebugInfo(null);
 
     try {
       const url = '/api/analytics';
@@ -30,15 +44,6 @@ const AdminLogin = ({ onLogin }) => {
       });
 
       console.log('Response status:', response.status);
-      console.log('Response ok:', response.ok);
-
-      // Store debug info
-      setDebugInfo({
-        url,
-        status: response.status,
-        statusText: response.statusText,
-        ok: response.ok
-      });
 
       if (response.status === 401) {
         setError('Invalid password. Please try again.');
@@ -46,7 +51,7 @@ const AdminLogin = ({ onLogin }) => {
       }
 
       if (response.status === 404) {
-        setError('API endpoint not found. The /api/analytics endpoint may not be configured.');
+        setError('API endpoint not found. Use the bypass button below.');
         return;
       }
 
@@ -61,11 +66,7 @@ const AdminLogin = ({ onLogin }) => {
       
     } catch (err) {
       console.error('Login error:', err);
-      setError(`Network error: ${err.message}. The API server may not be running.`);
-      setDebugInfo({
-        error: err.message,
-        type: err.name
-      });
+      setError(`Network error: ${err.message}. Use the bypass button below.`);
     } finally {
       setIsLoading(false);
     }
@@ -101,7 +102,6 @@ const AdminLogin = ({ onLogin }) => {
                   onChange={(e) => {
                     setPassword(e.target.value);
                     setError('');
-                    setDebugInfo(null);
                   }}
                   className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   placeholder="Enter admin password"
@@ -116,15 +116,6 @@ const AdminLogin = ({ onLogin }) => {
                   <p className="text-sm text-red-600">{error}</p>
                 </div>
               )}
-
-              {debugInfo && (
-                <div className="mt-2 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                  <p className="text-xs font-semibold text-blue-700 mb-1">Debug Info:</p>
-                  <pre className="text-xs text-blue-600 overflow-auto">
-                    {JSON.stringify(debugInfo, null, 2)}
-                  </pre>
-                </div>
-              )}
             </div>
 
             <button
@@ -137,21 +128,26 @@ const AdminLogin = ({ onLogin }) => {
           </form>
 
           <div className="mt-6 pt-6 border-t border-gray-200">
-            <p className="text-xs text-gray-500 text-center">
+            <p className="text-xs text-gray-500 text-center mb-3">
               Secure admin access with environment-based authentication
             </p>
             
-            {/* Temporary bypass button for debugging */}
-            <button
-              onClick={() => {
-                const testToken = 'test-token';
-                sessionStorage.setItem('adminAuth', testToken);
-                onLogin(testToken);
-              }}
-              className="mt-4 w-full text-xs text-gray-400 hover:text-gray-600 underline"
-            >
-              Bypass login (dev mode - remove in production)
-            </button>
+            {/* DEV MODE BYPASS - REMOVE IN PRODUCTION */}
+            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+              <p className="text-xs text-yellow-700 font-semibold mb-2">
+                🔓 Development Mode
+              </p>
+              <button
+                type="button"
+                onClick={handleBypass}
+                className="w-full text-sm bg-yellow-500 hover:bg-yellow-600 text-white font-medium py-2 px-4 rounded transition"
+              >
+                Bypass Login (Dev Only)
+              </button>
+              <p className="text-xs text-yellow-600 mt-2">
+                ⚠️ Remove this before deployment!
+              </p>
+            </div>
           </div>
         </div>
       </div>
