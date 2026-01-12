@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { Upload, FileJson, GitCompare, TrendingUp, Calendar, Download, AlertCircle, Zap, Shield, Clock, BarChart3, ChevronDown } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
 import analytics from './utils/analytics';
@@ -1183,9 +1184,9 @@ const ProductSnapshotTracker = () => {
               <p>© 2025 B2B Data Tracker. All rights reserved.</p>
               <p>Created by Georgios Trochidis</p>
               <div className="flex gap-4 justify-center mt-2">
-                <a href="/terms" className="hover:text-blue-400 transition-colors">Terms of Use</a>
-                <a href="/privacy" className="hover:text-blue-400 transition-colors">Privacy Policy</a>
-                <a href="/cookies" className="hover:text-blue-400 transition-colors">Cookie Policy</a>
+                <Link to="/terms" className="hover:text-blue-400 transition-colors">Terms of Use</Link>
+                <Link to="/privacy" className="hover:text-blue-400 transition-colors">Privacy Policy</Link>
+                <Link to="/cookies" className="hover:text-blue-400 transition-colors">Cookie Policy</Link>
               </div>
             </div>
           </div>

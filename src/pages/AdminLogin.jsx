@@ -5,7 +5,7 @@ const AdminLogin = ({ onLogin }) => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (!password) {
@@ -13,9 +13,30 @@ const AdminLogin = ({ onLogin }) => {
       return;
     }
 
-    // Store auth token in sessionStorage
-    sessionStorage.setItem('adminAuth', password);
-    onLogin(password);
+    // Test the password by making a request to the analytics endpoint
+    try {
+      const response = await fetch('/api/analytics', {
+        headers: {
+          'Authorization': `Bearer ${password}`,
+        },
+      });
+
+      if (response.status === 401) {
+        setError('Invalid password. Please try again.');
+        return;
+      }
+
+      if (!response.ok) {
+        setError('Server error. Please try again later.');
+        return;
+      }
+
+      // Password is correct, store it and proceed
+      sessionStorage.setItem('adminAuth', password);
+      onLogin(password);
+    } catch (err) {
+      setError('Network error. Please check your connection.');
+    }
   };
 
   return (

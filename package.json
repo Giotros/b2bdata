@@ -4,6 +4,7 @@
   "type": "module",
   "description": "Track supplier pricing and inventory changes over time",
   "homepage": "https://b2bdata.net",
+  "author": "Georgios Trochidis",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
