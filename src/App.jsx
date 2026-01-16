@@ -526,20 +526,20 @@ const ProductSnapshotTracker = () => {
     <div className="min-h-screen bg-slate-900 text-slate-100">
       {/* Hero Section */}
       <div className="bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 border-b border-slate-800">
-        <div className="max-w-6xl mx-auto px-6 py-16 text-center">
-          <div className="flex items-center justify-center mb-6">
-            <TrendingUp className="w-16 h-16 text-blue-400" />
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-12 sm:py-16 text-center">
+          <div className="flex items-center justify-center mb-4 sm:mb-6">
+            <TrendingUp className="w-12 h-12 sm:w-16 sm:h-16 text-blue-400" />
           </div>
-          <h1 className="text-5xl md:text-6xl font-bold mb-4 bg-gradient-to-r from-blue-400 to-blue-600 bg-clip-text text-transparent">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-3 sm:mb-4 bg-gradient-to-r from-blue-400 to-blue-600 bg-clip-text text-transparent px-2">
             B2B Data Tracker
           </h1>
-          <p className="text-xl text-slate-300 mb-4 max-w-2xl mx-auto">
+          <p className="text-base sm:text-lg md:text-xl text-slate-300 mb-3 sm:mb-4 max-w-2xl mx-auto px-4">
             Monitor your suppliers' pricing and inventory changes over time
           </p>
-          <p className="text-slate-400 max-w-xl mx-auto mb-8">
+          <p className="text-sm sm:text-base text-slate-400 max-w-xl mx-auto mb-6 sm:mb-8 px-4">
             Compare snapshots from different dates to identify trending products and make data-driven purchasing decisions
           </p>
-          <div className="flex items-center justify-center gap-6 text-sm text-slate-400">
+          <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-6 text-xs sm:text-sm text-slate-400 px-4">
             <div className="flex items-center gap-2">
               <Zap className="w-4 h-4 text-blue-400" />
               <span>100% Free</span>
@@ -557,29 +557,29 @@ const ProductSnapshotTracker = () => {
       </div>
 
       {/* Tool Section - MOVED TO TOP */}
-      <div className="max-w-6xl mx-auto px-6 py-12">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
         {/* Navigation */}
-        <div className="flex justify-center gap-4 mb-8">
+        <div className="flex flex-col sm:flex-row justify-center gap-3 sm:gap-4 mb-6 sm:mb-8">
           <button
             onClick={() => setActiveTab('create')}
-            className={`flex items-center gap-2 px-6 py-3 rounded-lg font-medium transition-all ${
-              activeTab === 'create' 
-                ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/50' 
+            className={`flex items-center justify-center gap-2 px-4 sm:px-6 py-3 rounded-lg font-medium transition-all text-sm sm:text-base ${
+              activeTab === 'create'
+                ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/50'
                 : 'bg-slate-800 text-slate-300 hover:bg-slate-700 border border-slate-700'
             }`}
           >
-            <FileJson className="w-5 h-5" />
+            <FileJson className="w-4 h-4 sm:w-5 sm:h-5" />
             Create Snapshot
           </button>
           <button
             onClick={() => setActiveTab('compare')}
-            className={`flex items-center gap-2 px-6 py-3 rounded-lg font-medium transition-all ${
-              activeTab === 'compare' 
-                ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/50' 
+            className={`flex items-center justify-center gap-2 px-4 sm:px-6 py-3 rounded-lg font-medium transition-all text-sm sm:text-base ${
+              activeTab === 'compare'
+                ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/50'
                 : 'bg-slate-800 text-slate-300 hover:bg-slate-700 border border-slate-700'
             }`}
           >
-            <GitCompare className="w-5 h-5" />
+            <GitCompare className="w-4 h-4 sm:w-5 sm:h-5" />
             Compare Snapshots
           </button>
         </div>
@@ -594,18 +594,18 @@ const ProductSnapshotTracker = () => {
 
         {/* Create Snapshot Tab */}
         {activeTab === 'create' && (
-          <div className="bg-slate-800 rounded-xl shadow-2xl p-8 border border-slate-700">
-            <h2 className="text-2xl font-semibold mb-2">Create New Snapshot</h2>
-            <p className="text-slate-400 text-sm mb-6">
+          <div className="bg-slate-800 rounded-xl shadow-2xl p-4 sm:p-6 md:p-8 border border-slate-700">
+            <h2 className="text-xl sm:text-2xl font-semibold mb-2">Create New Snapshot</h2>
+            <p className="text-slate-400 text-xs sm:text-sm mb-4 sm:mb-6">
               Priority: File Upload → XML URL → Manual Paste. If you upload a file, it takes priority over URL.
             </p>
             
             <div className="space-y-6">
               <div>
-                <label className="block text-sm font-medium text-slate-300 mb-2">
-                  Upload XML File {xmlFile && <span className="text-blue-400">(Priority: This will be used)</span>}
+                <label className="block text-xs sm:text-sm font-medium text-slate-300 mb-2">
+                  Upload XML File {xmlFile && <span className="text-blue-400 text-xs">(Priority: This will be used)</span>}
                 </label>
-                <div className="flex gap-2">
+                <div className="flex flex-col sm:flex-row gap-2">
                   <input
                     type="file"
                     accept=".xml"
@@ -615,7 +615,7 @@ const ProductSnapshotTracker = () => {
                       setXmlFile(file);
                       setSnapshot(null);
                     }}
-                    className="flex-1 px-4 py-3 bg-slate-900 border border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 text-slate-100 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-blue-600 file:text-white file:cursor-pointer hover:file:bg-blue-700"
+                    className="flex-1 px-3 sm:px-4 py-2 sm:py-3 bg-slate-900 border border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 text-slate-100 text-sm file:mr-2 sm:file:mr-4 file:py-1 sm:file:py-2 file:px-2 sm:file:px-4 file:rounded-lg file:border-0 file:bg-blue-600 file:text-white file:cursor-pointer file:text-xs sm:file:text-sm hover:file:bg-blue-700"
                   />
                   {xmlFile && (
                     <button
@@ -623,16 +623,17 @@ const ProductSnapshotTracker = () => {
                         setXmlFile(null);
                         document.getElementById('fileInput').value = '';
                       }}
-                      className="px-4 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors flex items-center gap-2"
+                      className="px-4 py-2 sm:py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors flex items-center justify-center gap-2 sm:w-auto w-full"
                       title="Clear file"
                     >
                       <span className="text-xl">×</span>
+                      <span className="sm:hidden">Clear</span>
                     </button>
                   )}
                 </div>
                 {xmlFile && (
-                  <p className="mt-2 text-sm text-green-400 flex items-center gap-2">
-                    <span>✓</span> Selected: {xmlFile.name}
+                  <p className="mt-2 text-xs sm:text-sm text-green-400 flex items-center gap-2 break-all">
+                    <span>✓</span> <span className="truncate">{xmlFile.name}</span>
                   </p>
                 )}
               </div>
@@ -644,9 +645,9 @@ const ProductSnapshotTracker = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-300 mb-2">
-                  XML Feed URL {!xmlFile && xmlUrl && <span className="text-blue-400">(This will be used)</span>}
-                  {xmlFile && <span className="text-slate-500">(File takes priority)</span>}
+                <label className="block text-xs sm:text-sm font-medium text-slate-300 mb-2">
+                  XML Feed URL {!xmlFile && xmlUrl && <span className="text-blue-400 text-xs">(This will be used)</span>}
+                  {xmlFile && <span className="text-slate-500 text-xs">(File takes priority)</span>}
                 </label>
                 <input
                   type="text"
@@ -657,7 +658,7 @@ const ProductSnapshotTracker = () => {
                     setSnapshot(null);
                   }}
                   disabled={xmlFile}
-                  className={`w-full px-4 py-3 bg-slate-900 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-slate-100 placeholder-slate-500 ${
+                  className={`w-full px-3 sm:px-4 py-2 sm:py-3 bg-slate-900 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-slate-100 placeholder-slate-500 text-sm ${
                     xmlFile ? 'border-slate-700 opacity-50 cursor-not-allowed' : 'border-slate-600'
                   }`}
                 />
@@ -671,13 +672,13 @@ const ProductSnapshotTracker = () => {
               <button
                 onClick={handleCreateSnapshot}
                 disabled={loading}
-                className="w-full bg-blue-600 text-white py-4 rounded-lg font-semibold hover:bg-blue-700 transition-all disabled:bg-slate-600 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg hover:shadow-blue-500/50"
+                className="w-full bg-blue-600 text-white py-3 sm:py-4 rounded-lg font-semibold text-sm sm:text-base hover:bg-blue-700 transition-all disabled:bg-slate-600 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg hover:shadow-blue-500/50"
               >
                 {loading ? (
                   <>Processing...</>
                 ) : (
                   <>
-                    <Download className="w-5 h-5" />
+                    <Download className="w-4 h-4 sm:w-5 sm:h-5" />
                     Generate Snapshot
                   </>
                 )}
