@@ -6,25 +6,9 @@ const AdminLogin = ({ onLogin }) => {
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleBypass = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    
-    console.log('Bypass button clicked');
-    const testToken = 'bypass-token-' + Date.now();
-    
-    // Store in sessionStorage
-    sessionStorage.setItem('adminAuth', testToken);
-    console.log('Token saved to sessionStorage:', testToken);
-    
-    // Call the login handler
-    onLogin(testToken);
-    console.log('onLogin called');
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!password) {
       setError('Please enter a password');
       return;
@@ -34,40 +18,57 @@ const AdminLogin = ({ onLogin }) => {
     setError('');
 
     try {
+      // Expected password (matches ADMIN_PASSWORD in .env.local)
+      const EXPECTED_PASSWORD = 'tryhackmenexttimebro123!?';
+
+      // Try API authentication first (works in production/Vercel)
       const url = '/api/analytics';
-      console.log('Attempting to authenticate with:', url);
-      
-      const response = await fetch(url, {
-        headers: {
-          'Authorization': `Bearer ${password}`,
-        },
-      });
+      console.log('Attempting API authentication...');
 
-      console.log('Response status:', response.status);
+      try {
+        const response = await fetch(url, {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${password}`,
+          },
+        });
 
-      if (response.status === 401) {
+        console.log('API Response status:', response.status);
+
+        if (response.ok) {
+          // API authentication successful
+          console.log('API authentication successful');
+          sessionStorage.setItem('adminAuth', password);
+          onLogin(password);
+          return;
+        }
+
+        if (response.status === 401) {
+          setError('Invalid password. Please try again.');
+          setIsLoading(false);
+          return;
+        }
+
+        // API not available or other error - fall back to local check
+        console.log('API not available (status ' + response.status + '), using local authentication...');
+
+      } catch (apiError) {
+        console.log('API not reachable, using local authentication...', apiError.message);
+      }
+
+      // Fallback: Local authentication (for development when API not deployed)
+      if (password === EXPECTED_PASSWORD) {
+        console.log('Local authentication successful');
+        sessionStorage.setItem('adminAuth', password);
+        onLogin(password);
+      } else {
         setError('Invalid password. Please try again.');
-        return;
+        setIsLoading(false);
       }
 
-      if (response.status === 404) {
-        setError('API endpoint not found. Use the bypass button below.');
-        return;
-      }
-
-      if (!response.ok) {
-        setError(`Server error (${response.status}): ${response.statusText}`);
-        return;
-      }
-
-      // Password is correct, store it and proceed
-      sessionStorage.setItem('adminAuth', password);
-      onLogin(password);
-      
     } catch (err) {
       console.error('Login error:', err);
-      setError(`Network error: ${err.message}. Use the bypass button below.`);
-    } finally {
+      setError(`Authentication error: ${err.message}`);
       setIsLoading(false);
     }
   };
@@ -128,26 +129,9 @@ const AdminLogin = ({ onLogin }) => {
           </form>
 
           <div className="mt-6 pt-6 border-t border-gray-200">
-            <p className="text-xs text-gray-500 text-center mb-3">
+            <p className="text-xs text-gray-500 text-center">
               Secure admin access with environment-based authentication
             </p>
-            
-            {/* DEV MODE BYPASS - REMOVE IN PRODUCTION */}
-            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-              <p className="text-xs text-yellow-700 font-semibold mb-2">
-                🔓 Development Mode
-              </p>
-              <button
-                type="button"
-                onClick={handleBypass}
-                className="w-full text-sm bg-yellow-500 hover:bg-yellow-600 text-white font-medium py-2 px-4 rounded transition"
-              >
-                Bypass Login (Dev Only)
-              </button>
-              <p className="text-xs text-yellow-600 mt-2">
-                ⚠️ Remove this before deployment!
-              </p>
-            </div>
           </div>
         </div>
       </div>
