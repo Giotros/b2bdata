@@ -36,3 +36,13 @@ Thumbs.db
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+# Test files
+test-admin.html
+
+# Duplicate/backup files
+package-lock*.json
+*2.json
+
+# Temporary instruction files
+FAVICON_INSTRUCTIONS.md
