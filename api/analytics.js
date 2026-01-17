@@ -1,11 +1,13 @@
 // Analytics collection and retrieval API
-// Stores events in-memory (for demonstration) or can be connected to a database
+// Uses Vercel KV (Redis) for persistent storage
 
-// In-memory storage (replace with database in production)
-let analyticsData = [];
+import { kv } from '@vercel/kv';
 
 // Admin password from environment variable (required for production)
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
+
+// KV storage key
+const ANALYTICS_KEY = 'b2b-analytics-events';
 
 export default async function handler(req, res) {
   // CORS headers
@@ -26,13 +28,19 @@ export default async function handler(req, res) {
         return res.status(400).json({ error: 'Invalid events data' });
       }
 
-      // Add events to storage
+      // Get existing events from KV
+      let analyticsData = await kv.get(ANALYTICS_KEY) || [];
+
+      // Add new events
       analyticsData.push(...events);
 
-      // Keep only last 10,000 events to prevent memory issues
+      // Keep only last 10,000 events to prevent storage bloat
       if (analyticsData.length > 10000) {
         analyticsData = analyticsData.slice(-10000);
       }
+
+      // Save back to KV
+      await kv.set(ANALYTICS_KEY, analyticsData);
 
       return res.status(200).json({ success: true, stored: events.length });
     } catch (error) {
@@ -49,6 +57,9 @@ export default async function handler(req, res) {
       if (!authHeader || authHeader !== `Bearer ${ADMIN_PASSWORD}`) {
         return res.status(401).json({ error: 'Unauthorized' });
       }
+
+      // Get all events from KV
+      const analyticsData = await kv.get(ANALYTICS_KEY) || [];
 
       // Get query parameters for filtering
       const { startDate, endDate, eventType, limit = 1000 } = req.query;

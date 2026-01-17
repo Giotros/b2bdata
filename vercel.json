@@ -1,7 +1,7 @@
 {
   "rewrites": [
     {
-      "source": "/(.*)",
+      "source": "/:path((?!robots\\.txt|sitemap\\.xml|favicon\\.ico|.*\\.png|.*\\.svg|api/).*)",
       "destination": "/index.html"
     }
   ]
