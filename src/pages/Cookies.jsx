@@ -1,9 +1,16 @@
 import React from 'react';
 import { TrendingUp, ArrowLeft } from 'lucide-react';
+import SEO from '../components/SEO';
 
 const CookiePolicy = () => {
   return (
-    <div className="min-h-screen bg-slate-900 text-slate-100">
+    <>
+      <SEO
+        title="Cookie Policy - B2B Data Tracker"
+        description="Cookie policy for B2B Data Tracker. Learn about how we use cookies and local storage for analytics and user preferences."
+        canonicalPath="/cookies"
+      />
+      <div className="min-h-screen bg-slate-900 text-slate-100">
       {/* Header */}
       <div className="bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 border-b border-slate-800">
         <div className="max-w-4xl mx-auto px-6 py-8">
@@ -177,6 +184,7 @@ const CookiePolicy = () => {
         </div>
       </footer>
     </div>
+    </>
   );
 };
 

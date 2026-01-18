@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Upload, FileJson, GitCompare, TrendingUp, Calendar, Download, AlertCircle, Zap, Shield, Clock, BarChart3, ChevronDown } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
+import SEO from './components/SEO';
 import analytics from './utils/analytics';
 
 const ProductSnapshotTracker = () => {
@@ -523,7 +524,9 @@ const ProductSnapshotTracker = () => {
   const COLORS = ['#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899'];
 
   return (
-    <div className="min-h-screen bg-slate-900 text-slate-100">
+    <>
+      <SEO />
+      <div className="min-h-screen bg-slate-900 text-slate-100">
       {/* Hero Section */}
       <div className="bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 border-b border-slate-800">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 py-12 sm:py-16 text-center">
@@ -1221,6 +1224,7 @@ const ProductSnapshotTracker = () => {
         </div>
       )}
     </div>
+    </>
   );
 };
 

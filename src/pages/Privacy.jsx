@@ -1,9 +1,16 @@
 import React from 'react';
 import { TrendingUp, ArrowLeft } from 'lucide-react';
+import SEO from '../components/SEO';
 
 const PrivacyPolicy = () => {
   return (
-    <div className="min-h-screen bg-slate-900 text-slate-100">
+    <>
+      <SEO
+        title="Privacy Policy - B2B Data Tracker"
+        description="Privacy policy for B2B Data Tracker. Learn how we protect your data with client-side processing and privacy-focused analytics."
+        canonicalPath="/privacy"
+      />
+      <div className="min-h-screen bg-slate-900 text-slate-100">
       {/* Header */}
       <div className="bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 border-b border-slate-800">
         <div className="max-w-4xl mx-auto px-6 py-8">
@@ -178,6 +185,7 @@ const PrivacyPolicy = () => {
         </div>
       </footer>
     </div>
+    </>
   );
 };
 

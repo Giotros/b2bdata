@@ -1,9 +1,16 @@
 import React from 'react';
 import { TrendingUp, ArrowLeft } from 'lucide-react';
+import SEO from '../components/SEO';
 
 const TermsOfUse = () => {
   return (
-    <div className="min-h-screen bg-slate-900 text-slate-100">
+    <>
+      <SEO
+        title="Terms of Use - B2B Data Tracker"
+        description="Terms of use and service agreement for B2B Data Tracker. Understand your rights and responsibilities when using our supplier price and inventory tracking tool."
+        canonicalPath="/terms"
+      />
+      <div className="min-h-screen bg-slate-900 text-slate-100">
       {/* Header */}
       <div className="bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 border-b border-slate-800">
         <div className="max-w-4xl mx-auto px-6 py-8">
@@ -126,6 +133,7 @@ const TermsOfUse = () => {
         </div>
       </footer>
     </div>
+    </>
   );
 };
 
