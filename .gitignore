@@ -46,3 +46,5 @@ package-lock*.json
 
 # Temporary instruction files
 FAVICON_INSTRUCTIONS.md
+.vercel
+.env*.local
