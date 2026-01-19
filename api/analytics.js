@@ -1,13 +1,27 @@
 // Analytics collection and retrieval API
-// Uses Vercel KV (Redis) for persistent storage
+// Uses Redis for persistent storage
 
-import { kv } from '@vercel/kv';
+import { createClient } from 'redis';
 
 // Admin password from environment variable (required for production)
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
 
-// KV storage key
+// Redis storage key
 const ANALYTICS_KEY = 'b2b-analytics-events';
+
+// Create Redis client
+let redisClient = null;
+
+async function getRedisClient() {
+  if (!redisClient) {
+    redisClient = createClient({
+      url: process.env.REDIS_URL
+    });
+    redisClient.on('error', (err) => console.error('Redis Client Error', err));
+    await redisClient.connect();
+  }
+  return redisClient;
+}
 
 export default async function handler(req, res) {
   // CORS headers
@@ -28,8 +42,12 @@ export default async function handler(req, res) {
         return res.status(400).json({ error: 'Invalid events data' });
       }
 
-      // Get existing events from KV
-      let analyticsData = await kv.get(ANALYTICS_KEY) || [];
+      // Get Redis client
+      const redis = await getRedisClient();
+
+      // Get existing events from Redis
+      const storedData = await redis.get(ANALYTICS_KEY);
+      let analyticsData = storedData ? JSON.parse(storedData) : [];
 
       // Add new events
       analyticsData.push(...events);
@@ -39,8 +57,8 @@ export default async function handler(req, res) {
         analyticsData = analyticsData.slice(-10000);
       }
 
-      // Save back to KV
-      await kv.set(ANALYTICS_KEY, analyticsData);
+      // Save back to Redis
+      await redis.set(ANALYTICS_KEY, JSON.stringify(analyticsData));
 
       return res.status(200).json({ success: true, stored: events.length });
     } catch (error) {
@@ -58,8 +76,12 @@ export default async function handler(req, res) {
         return res.status(401).json({ error: 'Unauthorized' });
       }
 
-      // Get all events from KV
-      const analyticsData = await kv.get(ANALYTICS_KEY) || [];
+      // Get Redis client
+      const redis = await getRedisClient();
+
+      // Get all events from Redis
+      const storedData = await redis.get(ANALYTICS_KEY);
+      const analyticsData = storedData ? JSON.parse(storedData) : [];
 
       // Get query parameters for filtering
       const { startDate, endDate, eventType, limit = 1000 } = req.query;
